@@ -2,7 +2,7 @@
 
 General research work under `/home/paunchygent`, with TAALED, TAALES and JASP as peer tools. The Mac route remains the existing Tailscale/SSH tunnel to `http://127.0.0.1:13000/`. Neither published port is widened beyond host loopback.
 
-The streamed desktop is fixed at `1920x1080` with 125% UI scaling for a 14-inch MacBook display. Browser-driven resolution changes are disabled so reconnects cannot silently change the canvas. The bottom panel uses the conventional application menu, running-applications taskbar, system tray, volume, clock, and show-desktop controls; the workspace switcher and empty quick-launch placeholder are removed.
+The streamed desktop is fixed at `1920x1080` with 125% UI scaling for a 14-inch MacBook display. Browser-driven resolution changes are disabled so reconnects cannot silently change the canvas. The pointer is rendered into the video stream; browser-side cursors left the mouse invisible over the canvas. The bottom panel uses the conventional application menu, running-applications taskbar, system tray, volume, clock, and show-desktop controls; the workspace switcher and empty quick-launch placeholder are removed.
 
 The application is not tied to one workshop or dataset. File browsers start at the host's `/home/paunchygent`, mounted as `/hemma-home`. ELLIPSE, the private HuleEdu cohort, and Scott Crossley's workshop files appear as optional shortcuts when present.
 
