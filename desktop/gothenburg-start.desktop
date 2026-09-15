@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=00 Start Here
+Comment=Workshop routes and recovery notes
+Exec="/opt/workshop/bin/workshop-launch" start
+Terminal=false
+Icon=help-browser
+Categories=Education;Science;
+Keywords=workshop;lexical;TAALES;TAALED;
+StartupNotify=false

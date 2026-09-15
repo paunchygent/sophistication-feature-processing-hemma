@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Hemma Home
-Comment=Browse the Hemma home directory
-Exec=thunar /hemma-home
-Terminal=false
-Icon=folder-remote

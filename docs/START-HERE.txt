@@ -1,0 +1,74 @@
+Gothenburg Lexical Workshop — 16 September 2026
+
+START
+Use the TAALES 2.2 or TAALED 1.4.1 desktop/menu launcher.
+Workshop Files opens a short navigation directory. Workshop Output opens results.
+
+NAVIGATION
+/config/Navigation/10 Workshop Texts   The inner folder containing workshop .txt files
+/config/Navigation/20 Smoke Input      The locally provisioned quick-test input
+/config/Navigation/30 Output           Generated results
+/config/Navigation/40 Materials        Workshop slides, readings and supplied data
+/config/Navigation/90 Hemma Home       Server home and repositories (separate from workshop data)
+
+These are shortcuts, not copies and not access controls.
+Readings:     /config/workspace/materials/readings
+Presentation: /config/workspace/materials/presentation
+Reference data/results: /config/workspace/materials/data
+
+INPUT FOR BOTH TOOLS
+/config/workspace/materials/data/ICNALE_500_merged_clean_texts/ICNALE_500_merged_clean
+Quick test: /config/workspace/smoke-input
+Choose the inner text folder, not the containing archive or data directory.
+The workshop inventory describes 500 essays. TAALED displays the files actually
+present; it processes visible lowercase .txt files in that folder, not subfolders.
+
+TAALED
+1. Check the input and displayed file count.
+2. Choose the word groups and indices instructed in the workshop. Basic counts
+   and lexical density are always included. No index preset is assumed.
+3. Run analysis. Results go to a new folder under:
+   /config/workspace/output/taaled
+4. Open run folder. Use taaled.csv only from a completed run folder.
+
+A folder ending in .incomplete is not a completed result, even if a CSV exists.
+Diagnostic output includes processed tokens/types; keep it with runtime data.
+The patch includes GUI/runtime and output-handling adaptations in addition to
+spaCy model loading. The current model environment can differ from that used to
+create the supplied reference results; numerical equality is not asserted.
+
+TAALES
+The route card has Copy path buttons for the input folder and a new output prefix.
+Click Launch TAALES, then select those locations in TAALES itself.
+Keep the route card open while copying paths.
+The executable's own pickers are not automatically configured by the launcher.
+Use a fresh filename for additional analyses in the same TAALES session.
+A TAALES launch folder is not proof that analysis finished: TAALES appends names
+such as results to the prefix. Check the application's completion message and the
+expected CSV header, file identities and row count.
+
+DISPLAY
+Use TAALED's Fit window button and Text DPI control. Scroll the options on a
+small display; Run analysis and status remain outside that scrolling area.
+Display and Fonts opens XFCE appearance settings, not the stream resolution.
+The browser's remote-desktop sidebar controls the stream when supported by the
+installed image. Avoid changing several scaling controls at once.
+
+RECOVERY
+Browser/tunnel interruption: reconnect first; do not start the analysis again
+merely because its picture disappeared.
+TAALED window closed: reopen its launcher to see the independent worker's status.
+Container or session interruption: reconnect/reopen, inspect the last run, retain
+.incomplete files separately, and start a new run if the worker has stopped.
+There is no automatic resume or automatic restart of an interrupted analysis.
+Do not delete a lock file to clear a run: file existence is not a running lock.
+
+ON THE MAC
+The desktop tunnel and Finder's SMB mounts are separate connections. A working
+Finder mount does not prove the desktop tunnel is working, or vice versa.
+The operator must identify the Workshops-share path corresponding to the runtime
+workspace; a direct mapping cannot be inferred from the workshop materials.
+
+IMPLEMENTATION NOTE
+The original offline architect package is retained in docs/advisory as evidence.
+This integrated image installs its support code at /opt/workshop.

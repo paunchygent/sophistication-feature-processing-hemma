@@ -2,6 +2,7 @@ services:
   workshop:
     build:
       context: .
+      target: runtime
     image: sophistication-feature-processing-hemma:2026-09-15
     container_name: gothenburg-lexicon-workshop
     restart: unless-stopped
@@ -14,6 +15,8 @@ services:
       TZ: Europe/Stockholm
       TITLE: Lexical Analysis Workshop
       SELKIES_FRAMERATE: "30"
+      WORKSHOP_ENGINE: /opt/workshop/app/taaled/TAALED_1_4_1_Hemma.py
+      WORKSHOP_PYTHON: /opt/taaled-venv/bin/python
     ports:
       - 127.0.0.1:13000:3000
       - 127.0.0.1:13001:3001

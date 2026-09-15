@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=TAALES 2.2
-Comment=Lexical sophistication analysis in a readable workshop window
-Exec=/opt/workshop/bin/launch-taales-workshop.sh
-Path=/config/Navigation
-Terminal=false
-Icon=accessories-text-editor
-StartupNotify=true

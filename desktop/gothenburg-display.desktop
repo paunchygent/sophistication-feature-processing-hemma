@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Display and Fonts
+Comment=XFCE appearance settings; TAALED has separate Text DPI
+Exec="/opt/workshop/bin/workshop-launch" display
+Terminal=false
+Icon=preferences-desktop-display
+Categories=Education;Science;
+Keywords=workshop;lexical;TAALES;TAALED;
+StartupNotify=false

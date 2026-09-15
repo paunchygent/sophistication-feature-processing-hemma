@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Workshop Output
+Comment=Generated runtime results, never distributable source
+Exec="/opt/workshop/bin/workshop-launch" output
+Terminal=false
+Icon=folder-documents
+Categories=Education;Science;
+Keywords=workshop;lexical;TAALES;TAALED;
+StartupNotify=false

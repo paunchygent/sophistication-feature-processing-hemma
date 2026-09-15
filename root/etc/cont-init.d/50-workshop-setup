@@ -3,27 +3,30 @@ set -euo pipefail
 
 input_dir=/config/workspace/materials/data/ICNALE_500_merged_clean_texts/ICNALE_500_merged_clean
 output_dir=/config/workspace/output
+state_dir=/config/.local/state/gothenburg-workshop
+legacy_dir="$state_dir/pre-candidate-shortcuts"
 
-mkdir -p /config/Desktop /config/Navigation "$output_dir"
-cp /opt/workshop/desktop/*.desktop /config/Desktop/
-chmod 755 /config/Desktop/*.desktop
+mkdir -p /config/Desktop /config/Navigation "$input_dir" "$output_dir/taaled" "$output_dir/taales" \
+  /config/workspace/materials /config/workspace/smoke-input \
+  "$legacy_dir/Desktop" "$legacy_dir/Navigation"
 
-ln -sfn /hemma-home "/config/Navigation/Hemma Home"
-ln -sfn /config/workspace "/config/Navigation/All Workshop Files"
-ln -sfn "$input_dir" "/config/Navigation/Workshop Texts"
-ln -sfn "$output_dir" "/config/Navigation/Workshop Output"
-ln -sfn "$input_dir" /workshop-input
-ln -sfn "$output_dir" /workshop-output
+if [[ ! -e /config/workspace/smoke-input/example.txt ]]; then
+  cp /opt/workshop/fixtures/smoke-input/example.txt /config/workspace/smoke-input/example.txt
+fi
 
-cat > /config/Desktop/START-HERE.txt <<'EOF'
-LEXICAL ANALYSIS WORKSHOP
+# Preserve shortcuts from the first repository version instead of deleting them.
+for name in Hemma-Home.desktop TAALED-1.4.1.desktop TAALES-2.2.desktop Workshop-Files.desktop; do
+  if [[ -f "/config/Desktop/$name" && ! -e "$legacy_dir/Desktop/$name" ]]; then
+    mv "/config/Desktop/$name" "$legacy_dir/Desktop/$name"
+  fi
+done
 
-TAALED opens with Workshop Texts and Workshop Output preselected.
+for name in "Hemma Home" "All Workshop Files" "Workshop Texts" "Workshop Output"; do
+  if [[ -L "/config/Navigation/$name" && ! -e "$legacy_dir/Navigation/$name" ]]; then
+    mv "/config/Navigation/$name" "$legacy_dir/Navigation/$name"
+  fi
+done
 
-TAALES is an upstream packaged binary. In its file chooser, select:
-  Input:  /workshop-input
-  Output: /workshop-output/taales-
+/opt/taaled-venv/bin/python /opt/workshop/bin/install-navigation.py --apply
 
-The TAALES application appends names such as "results" to the output prefix.
-Use the desktop shortcuts to browse Hemma Home or all Workshop Files.
-EOF
+ln -sfn /hemma-home "/config/Navigation/90 Hemma Home"

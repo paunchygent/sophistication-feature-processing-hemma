@@ -16,6 +16,9 @@ import platform
 #import shutil
 #import subprocess
 import glob
+import csv
+
+WORKSHOP_IO_REVISION = 1
 import math
 import traceback
 from collections import Counter
@@ -54,7 +57,7 @@ def start_thread(def1, arg1, arg2, arg3):
 def resource_path(relative):
 	if hasattr(sys, "_MEIPASS"):
 		return os.path.join(sys._MEIPASS, relative)
-	return os.path.join(relative)
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative)
 
 color = "#f3f4f6"
 
@@ -308,25 +311,26 @@ class MyApp: #this is the class for the gui and the text analysis
 
 
 #### THIS IS BEGINNING OF PROGRAM ###
-def main(indir, outdir, var_dict):
-
-	import tkinter.messagebox
-	if indir == "":
-		tkinter.messagebox.showinfo("Supply Information", "Choose Input Directory")
-	if outdir == "":
-		tkinter.messagebox.showinfo("Choose Output Directory", "Choose Output Directory")
+def _read_legacy_text(filename):
+	# Preserve the existing decoding policy, but always release the handle.
+	with open(filename, "r", errors="ignore") as source:
+		return source.read()
 
 
-	if indir != "" and outdir != "":
-		dataQueue.put("Loading language model…")
-
+def main(indir, outdir, var_dict, *, input_files=None, progress_queue=None):
+	# No Tk calls in the computational entry point. The workshop GUI validates
+	# on the UI thread; this entry also rejects incomplete CLI calls.
+	if not indir or not outdir:
+		raise ValueError("Input folder and output filename are required")
+	report_queue = progress_queue if progress_queue is not None else dataQueue
+	report_queue.put("Loading language model…")
 	import spacy
 	nlp = spacy.load('en_core_web_sm')
-	dataQueue.put("Language model ready. Preparing texts…")
+	report_queue.put("Language model ready. Preparing texts…")
 
 	#thus begins the text analysis portion of the program
-	adj_word_list = open(resource_path("dep_files/adj_lem_list.txt"), "r",errors = 'ignore').read().split("\n")[:-1]
-	real_word_list = open(resource_path("dep_files/real_words.txt"), "r",errors = 'ignore').read().split("\n")[:-1] #these are lowered
+	adj_word_list = _read_legacy_text(resource_path("dep_files/adj_lem_list.txt")).split("\n")[:-1]
+	real_word_list = _read_legacy_text(resource_path("dep_files/real_words.txt")).split("\n")[:-1] #these are lowered
 
 	### THESE ARE PERTINENT FOR ALL IMPORTANT INDICES ####
 	noun_tags = ["NN", "NNS", "NNP", "NNPS"] #consider whether to identify gerunds
@@ -619,206 +623,190 @@ def main(indir, outdir, var_dict):
 
 #### END DEFINED FUNCTIONS ####
 
-	inputfile = indir + "/*.txt"
-	outf=open(outdir, "w")
-
-	filenames = glob.glob(inputfile)
+	filenames = list(input_files) if input_files is not None else sorted(glob.glob(os.path.join(indir, "*.txt")))
+	if not filenames:
+		raise ValueError("The input folder contains no visible lowercase .txt files")
 	file_number = 0
-
 	if var_dict["indout"] == 1:
-		directory = outdir[:-4] + "_diagnostic/" #this is for diagnostic file
-		if not os.path.exists(directory):
-			os.makedirs(directory)
-
-		for the_file in os.listdir(directory): #this cleans out the old diagnostic file (if applicable)
-			file_path = os.path.join(directory, the_file)
-			os.unlink(file_path)
-
+		directory = outdir[:-4] + "_diagnostic/"
+		# Each workshop run owns a fresh directory. Never clean an old one.
+		os.mkdir(directory)
 
 	nfiles = len(filenames)
 	file_counter = 1
 
 
-	for filename in filenames:
+	with open(outdir, "x", encoding="utf-8", newline="") as outf:
+		writer = csv.writer(outf, lineterminator="\n")
+		for filename in filenames:
 
-		if system == "M" or system == "L":
-			simple_filename = filename.split("/")[-1]
+			if system == "M" or system == "L":
+				simple_filename = filename.split("/")[-1]
 
-		if system == "W":
-			simple_filename = filename.split("\\")[-1]
-			if "/" in simple_filename:
-				simple_filename = simple_filename.split("/")[-1]
+			if system == "W":
+				simple_filename = filename.split("\\")[-1]
+				if "/" in simple_filename:
+					simple_filename = simple_filename.split("/")[-1]
 
-		#print(simple_filename)
+			#print(simple_filename)
 
-		if var_dict["indout"] == 1:
-			basic_diag_file_name = directory + simple_filename[:-4] + "_processed.txt"
-			basic_diag_file = open(basic_diag_file_name, "w")
 
-		index_list = [simple_filename]
-		header_list = ["filename"]
+			index_list = [simple_filename]
+			header_list = ["filename"]
 
-		#updates Program Status
-		filename1 = ("Processing: " + str(file_counter) + " of " + str(nfiles) + " files")
-		dataQueue.put(filename1)
-		file_counter+=1
+			#updates Program Status
+			filename1 = ("Processing: " + str(file_counter) + " of " + str(nfiles) + " files")
+			report_queue.put(filename1)
+			file_counter+=1
 
-		if system == "M" or system == "L":
-			filename_2 = filename.split("/")[-1]
-		elif system == "W":
-			filename_2 = filename.split("\\")[-1]
+			if system == "M" or system == "L":
+				filename_2 = filename.split("/")[-1]
+			elif system == "W":
+				filename_2 = filename.split("\\")[-1]
 
-		raw_text= open(filename, "r", errors = 'ignore').read()
-		raw_text = re.sub(r'\s+',' ',raw_text)
-		#while "	 " in raw_text:
-			#raw_text = raw_text.replace("  ", " ")
+			raw_text= _read_legacy_text(filename)
+			raw_text = re.sub(r'\s+',' ',raw_text)
+			#while "	 " in raw_text:
+				#raw_text = raw_text.replace("  ", " ")
 
-		refined_lemma_dict = tag_processor_spaCy(raw_text)
+			refined_lemma_dict = tag_processor_spaCy(raw_text)
 
-		lemma_text_aw = refined_lemma_dict["lemma"]
+			lemma_text_aw = refined_lemma_dict["lemma"]
 
-		lemma_text_cw = refined_lemma_dict["content"]
-		lemma_text_fw = refined_lemma_dict["function"]
+			lemma_text_cw = refined_lemma_dict["content"]
+			lemma_text_fw = refined_lemma_dict["function"]
 
-		indexer(header_list, index_list, "basic_ntokens",  len(lemma_text_aw))
-		indexer(header_list, index_list, "basic_ntypes",  len(set(lemma_text_aw)))
-		indexer(header_list, index_list, "basic_ncontent_tokens",  len(lemma_text_cw))
-		indexer(header_list, index_list, "basic_ncontent_types",  len(set(lemma_text_cw)))
-		indexer(header_list, index_list, "basic_nfunction_tokens",	len(lemma_text_fw))
-		indexer(header_list, index_list, "basic_nfunction_types",  len(set(lemma_text_fw)))
+			indexer(header_list, index_list, "basic_ntokens",  len(lemma_text_aw))
+			indexer(header_list, index_list, "basic_ntypes",  len(set(lemma_text_aw)))
+			indexer(header_list, index_list, "basic_ncontent_tokens",  len(lemma_text_cw))
+			indexer(header_list, index_list, "basic_ncontent_types",  len(set(lemma_text_cw)))
+			indexer(header_list, index_list, "basic_nfunction_tokens",	len(lemma_text_fw))
+			indexer(header_list, index_list, "basic_nfunction_types",  len(set(lemma_text_fw)))
 
-		indexer(header_list, index_list, "lexical_density_types",  lex_density(lemma_text_cw, lemma_text_fw)[1])
-		indexer(header_list, index_list, "lexical_density_tokens",	lex_density(lemma_text_cw, lemma_text_fw)[0])
+			indexer(header_list, index_list, "lexical_density_types",  lex_density(lemma_text_cw, lemma_text_fw)[1])
+			indexer(header_list, index_list, "lexical_density_tokens",	lex_density(lemma_text_cw, lemma_text_fw)[0])
 
-		if var_dict["simple_ttr"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "simple_ttr_aw", ttr(lemma_text_aw)[0])
+			if var_dict["simple_ttr"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "simple_ttr_aw", ttr(lemma_text_aw)[0])
 
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "simple_ttr_cw", ttr(lemma_text_cw)[0])
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "simple_ttr_fw", ttr(lemma_text_fw)[0])
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "simple_ttr_cw", ttr(lemma_text_cw)[0])
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "simple_ttr_fw", ttr(lemma_text_fw)[0])
 
-		if var_dict["root_ttr"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "root_ttr_aw", ttr(lemma_text_aw)[1])
+			if var_dict["root_ttr"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "root_ttr_aw", ttr(lemma_text_aw)[1])
 
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "root_ttr_cw", ttr(lemma_text_cw)[1])
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "root_ttr_fw", ttr(lemma_text_fw)[1])
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "root_ttr_cw", ttr(lemma_text_cw)[1])
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "root_ttr_fw", ttr(lemma_text_fw)[1])
 
-		if var_dict["log_ttr"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "log_ttr_aw", ttr(lemma_text_aw)[2])
+			if var_dict["log_ttr"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "log_ttr_aw", ttr(lemma_text_aw)[2])
 
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "log_ttr_cw", ttr(lemma_text_cw)[2])
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "log_ttr_fw", ttr(lemma_text_fw)[2])
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "log_ttr_cw", ttr(lemma_text_cw)[2])
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "log_ttr_fw", ttr(lemma_text_fw)[2])
 
-		if var_dict["maas_ttr"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "maas_ttr_aw", ttr(lemma_text_aw)[3])
+			if var_dict["maas_ttr"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "maas_ttr_aw", ttr(lemma_text_aw)[3])
 
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "maas_ttr_cw", ttr(lemma_text_cw)[3])
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "maas_ttr_fw", ttr(lemma_text_fw)[3])
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "maas_ttr_cw", ttr(lemma_text_cw)[3])
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "maas_ttr_fw", ttr(lemma_text_fw)[3])
 
-		if var_dict["mattr"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "mattr50_aw", mattr(lemma_text_aw,50))
+			if var_dict["mattr"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "mattr50_aw", mattr(lemma_text_aw,50))
 
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "mattr50_cw", mattr(lemma_text_cw,50))
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "mattr50_fw", mattr(lemma_text_fw,50))
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "mattr50_cw", mattr(lemma_text_cw,50))
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "mattr50_fw", mattr(lemma_text_fw,50))
 
-		if var_dict["msttr"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "msttr50_aw", msttr(lemma_text_aw,50))
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "msttr50_cw", msttr(lemma_text_cw,50))
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "msttr50_fw", msttr(lemma_text_fw,50))
+			if var_dict["msttr"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "msttr50_aw", msttr(lemma_text_aw,50))
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "msttr50_cw", msttr(lemma_text_cw,50))
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "msttr50_fw", msttr(lemma_text_fw,50))
 
-		if var_dict["hdd"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "hdd42_aw", hdd(lemma_text_aw))
+			if var_dict["hdd"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "hdd42_aw", hdd(lemma_text_aw))
 
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "hdd42_cw", hdd(lemma_text_cw))
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "hdd42_fw", hdd(lemma_text_fw))
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "hdd42_cw", hdd(lemma_text_cw))
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "hdd42_fw", hdd(lemma_text_fw))
 
-		if var_dict["mltd"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "mtld_original_aw", mtld_original(lemma_text_aw))
+			if var_dict["mltd"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "mtld_original_aw", mtld_original(lemma_text_aw))
 
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "mtld_original_cw", mtld_original(lemma_text_cw))
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "mtld_original_fw", mtld_original(lemma_text_fw))
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "mtld_original_cw", mtld_original(lemma_text_cw))
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "mtld_original_fw", mtld_original(lemma_text_fw))
 
-		if var_dict["mltd_ma"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "mtld_ma_bi_aw", mtld_bi_directional_ma(lemma_text_aw))
+			if var_dict["mltd_ma"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "mtld_ma_bi_aw", mtld_bi_directional_ma(lemma_text_aw))
 
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "mtld_ma_bi_cw", mtld_bi_directional_ma(lemma_text_cw))
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "mtld_ma_bi_fw", mtld_bi_directional_ma(lemma_text_fw))
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "mtld_ma_bi_cw", mtld_bi_directional_ma(lemma_text_cw))
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "mtld_ma_bi_fw", mtld_bi_directional_ma(lemma_text_fw))
 
-		if var_dict["mtld_wrap"] == 1:
-			if var_dict["aw"] ==1:
-				indexer(header_list, index_list, "mtld_ma_wrap_aw", mtld_ma_wrap(lemma_text_aw))
+			if var_dict["mtld_wrap"] == 1:
+				if var_dict["aw"] ==1:
+					indexer(header_list, index_list, "mtld_ma_wrap_aw", mtld_ma_wrap(lemma_text_aw))
 
-			if var_dict["cw"] ==1:
-				indexer(header_list, index_list, "mtld_ma_wrap_cw", mtld_ma_wrap(lemma_text_cw))
-			if var_dict["fw"] ==1:
-				indexer(header_list, index_list, "mtld_ma_wrap_fw", mtld_ma_wrap(lemma_text_fw))
+				if var_dict["cw"] ==1:
+					indexer(header_list, index_list, "mtld_ma_wrap_cw", mtld_ma_wrap(lemma_text_cw))
+				if var_dict["fw"] ==1:
+					indexer(header_list, index_list, "mtld_ma_wrap_fw", mtld_ma_wrap(lemma_text_fw))
 
-#### output for user ###
-		if var_dict["indout"] == 1:
+	#### output for user ###
+			if var_dict["indout"] == 1:
+				basic_diag_file_name = directory + simple_filename[:-4] + "_processed.txt"
+				with open(basic_diag_file_name, "x", encoding="utf-8") as basic_diag_file:
 
-			basic_diag_file.write("tokens\n\n")
+					basic_diag_file.write("tokens\n\n")
 
-			for diags in lemma_text_aw:
-				try:
-					basic_diag_file.write(diags+"\n")
-				except UnicodeEncodeError:
-					basic_diag_file.write("encoding error!\n")
+					for diags in lemma_text_aw:
+						try:
+							basic_diag_file.write(diags+"\n")
+						except UnicodeEncodeError:
+							basic_diag_file.write("encoding error!\n")
 
-			basic_diag_file.write("\ntypes\n\n")
+					basic_diag_file.write("\ntypes\n\n")
 
-			for diags in list(set(lemma_text_aw)):
-				try:
-					basic_diag_file.write(diags+"\n")
-				except UnicodeEncodeError:
-					basic_diag_file.write("encoding error!\n")
+					for diags in list(set(lemma_text_aw)):
+						try:
+							basic_diag_file.write(diags+"\n")
+						except UnicodeEncodeError:
+							basic_diag_file.write("encoding error!\n")
 
-			basic_diag_file.flush()
 
-### end output for user ###
+	### end output for user ###
 
-		if file_number == 0:
-			header_out = ",".join(header_list) + "\n"
-			outf.write(header_out)
-			file_number +=1
-
-		out_list = []
-		for vars in index_list:
-			out_list.append(str(vars))
-		outstring = ",".join(out_list) + "\n"
-		outf.write(outstring)
-
+			if file_number == 0:
+				writer.writerow(header_list)
+				file_number += 1
+			writer.writerow(index_list)
 
 	nfiles = len(filenames)
 	finishmessage = ("Processed " + str(nfiles) + " Files")
-	dataQueue.put(finishmessage)
-	if system == "M":
-		messagebox.showinfo("Finished!", "TAALED has converted your files to numbers.\n\n Now the real work begins!")
+	report_queue.put(finishmessage)
 
 
 if __name__ == '__main__':
