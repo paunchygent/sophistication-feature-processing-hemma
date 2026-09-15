@@ -14,6 +14,7 @@ fi
 
 /opt/taaled-venv/bin/python /opt/workshop/bin/install-navigation.py
 cp /defaults/lxqt-session.conf /config/.config/lxqt/session.conf
+cp /defaults/lxqt-panel.conf /config/.config/lxqt/panel.conf
 cp /defaults/pcmanfm-settings.conf /config/.config/pcmanfm-qt/lxqt/settings.conf
 cp /defaults/suite.desktop /config/.config/autostart/sophistication-feature-processing.desktop
 cp /defaults/Xresources /config/.Xresources

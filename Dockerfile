@@ -7,6 +7,7 @@ RUN apt-get update \
         lxqt-admin \
         lxqt-archiver \
         lxqt-core \
+        oxygen-icon-theme \
         pavucontrol-qt \
         python3-tk \
         python3-venv \
