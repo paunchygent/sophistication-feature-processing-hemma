@@ -15,6 +15,12 @@ services:
       TZ: Europe/Stockholm
       TITLE: Sophistication Feature Processing
       SELKIES_FRAMERATE: "30"
+      SELKIES_MANUAL_WIDTH: "1440"
+      SELKIES_MANUAL_HEIGHT: "900"
+      SELKIES_IS_MANUAL_RESOLUTION_MODE: "true"
+      SELKIES_SCALING_DPI: "120"
+      SELKIES_SECOND_SCREEN: "false"
+      QT_SCALE_FACTOR: "1.25"
       WORKSHOP_ENGINE: /opt/workshop/app/taaled/TAALED_1_4_1_Hemma.py
       WORKSHOP_PYTHON: /opt/taaled-venv/bin/python
       FEATURE_BROWSE_ROOT: /hemma-home

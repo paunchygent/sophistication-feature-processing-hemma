@@ -16,10 +16,11 @@ fi
 cp /defaults/lxqt-session.conf /config/.config/lxqt/session.conf
 cp /defaults/pcmanfm-settings.conf /config/.config/pcmanfm-qt/lxqt/settings.conf
 cp /defaults/suite.desktop /config/.config/autostart/sophistication-feature-processing.desktop
+cp /defaults/Xresources /config/.Xresources
 if [[ ! -f /config/.config/openbox/rc.xml ]]; then
   cp /etc/xdg/openbox/rc.xml /config/.config/openbox/rc.xml
 fi
 sed -i 's#<application class="\*"><maximized>yes</maximized></application>#<application class="\*"><maximized>no</maximized></application>#' /config/.config/openbox/rc.xml
 chown -R abc:abc "$state" "$workspace/output/taaled" "$workspace/output/taales" \
   /config/Navigation /config/.config/autostart /config/.config/lxqt /config/.config/openbox \
-  /config/.config/pcmanfm-qt
+  /config/.config/pcmanfm-qt /config/.Xresources

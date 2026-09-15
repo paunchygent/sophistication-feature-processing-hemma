@@ -2,11 +2,13 @@
 
 A general-purpose, Tailscale-only graphical research workstation for TAALED, TAALES, and JASP. It runs on Hemma and is viewed from a Mac through an SSH tunnel at `http://127.0.0.1:13000/`.
 
+The streamed desktop is fixed at `1440x900` with 125% UI scaling for a 14-inch MacBook display. Browser-driven resolution changes are disabled so reconnects cannot silently return to an unnecessarily large canvas.
+
 The application is not tied to one workshop or dataset. File browsers start at the host's `/home/paunchygent`, mounted as `/hemma-home`. ELLIPSE, the private HuleEdu cohort, and Scott Crossley's workshop files appear as optional shortcuts when present.
 
 ## Current runnable baseline
 
-- LXQt provides a thin Ubuntu desktop with an application menu, taskbar, desktop surface, and PCManFM-Qt file management. It uses Openbox for window management. XFCE is deliberately bypassed because its GTK/Glycin icon-loader repeatedly aborts in this container, leaking X clients until the stream fails.
+- LXQt provides a lightweight but complete working desktop with an application menu, taskbar, desktop surface, PCManFM-Qt file management, terminal, text editor, image viewer, archive manager, process manager, clipboard manager, audio controls, and configuration tools. It uses Openbox for window management. XFCE is deliberately bypassed because its GTK/Glycin icon-loader repeatedly aborts in this container, leaking X clients until the stream fails.
 - Scott Crossley's portrait is the desktop canary: if the image is absent, the desktop layer has not initialized correctly.
 - TAALED has a responsive GUI and runs analysis in a detached single-run worker.
 - TAALES uses the unmodified upstream binary with a route card for copying input and output paths.

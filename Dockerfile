@@ -1,7 +1,20 @@
 FROM lscr.io/linuxserver/webtop@sha256:c4ceafc1c48ed9a61771345c74568d3bff6438802f0d89e9ebd9846e8404f696 AS runtime
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends lxqt-core python3-tk python3-venv xdotool x11-apps \
+    && apt-get install -y --no-install-recommends \
+        featherpad \
+        lximage-qt \
+        lxqt-admin \
+        lxqt-archiver \
+        lxqt-core \
+        pavucontrol-qt \
+        python3-tk \
+        python3-venv \
+        qlipper \
+        qps \
+        qterminal \
+        x11-apps \
+        xdotool \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /opt/workshop/requirements.txt
