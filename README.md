@@ -1,37 +1,42 @@
 # Sophistication Feature Processing on Hemma
 
-A disposable, Tailscale-only graphical workspace for the TAALED and TAALES tools used in Scott Crossley's Gothenburg lexical-analysis workshop.
+A general-purpose, Tailscale-only graphical research workstation for TAALED, TAALES, and JASP. It runs on Hemma and is viewed from a Mac through an SSH tunnel at `http://127.0.0.1:13000/`.
 
-The service runs an Ubuntu XFCE desktop on Hemma and is viewed from a Mac through an SSH tunnel. Webtop listens only on Hemma loopback ports `13000` and `13001`; it is not published directly to the LAN or internet.
+The application is not tied to one workshop or dataset. File browsers start at the host's `/home/paunchygent`, mounted as `/hemma-home`. ELLIPSE, the private HuleEdu cohort, and Scott Crossley's workshop files appear as optional shortcuts when present.
 
-## What this repository contains
+## Current runnable baseline
 
-- A responsive TAALED 1.4.1 UI with workshop routes, adjustable text DPI, a persistent status receipt, and an independent single-run worker.
-- A Webtop image and Compose service pinned to the tested upstream image digest.
-- Desktop navigation shortcuts for the workshop workspace and Hemma home directory.
-- A TAALES route card plus a resize-only launcher for the unmodified upstream binary.
-- Mac SSH-tunnel and Finder-share helpers that keep host names and credentials in local configuration.
+- Openbox is the desktop/window-manager layer. XFCE is deliberately bypassed because its GTK/Glycin icon-loader repeatedly aborts in this container, leaking X clients until the stream fails.
+- TAALED has a responsive GUI and runs analysis in a detached single-run worker.
+- TAALES uses the unmodified upstream binary with a route card for copying input and output paths.
+- A suite launcher provides TAALED, TAALES, JASP, Hemma Home, dataset shortcuts, and a terminal.
+- JASP is represented, but is the remaining runtime gap: its official Linux Flatpak cannot create the required Bubblewrap namespaces inside this Webtop container. The launcher reports that failure plainly.
 
-It intentionally excludes workshop essay bodies, generated CSV results, credentials, SSH material, the TAALES executable, and private Hemma files.
+No watchdog or automatic desktop recovery layer is installed. The current correction removes the crashing XFCE loop itself.
 
-## Hemma layout
+## Data and results
 
-The Compose service reuses these named volumes:
+The service reuses these legacy-named durable Docker volumes:
 
-- `gothenburg-lexicon-config` mounted at `/config`
-- `gothenburg-lexicon-workspace` mounted at `/config/workspace`
+- `gothenburg-lexicon-workspace` at `/config/workspace` for datasets, tools, and service output
+- `gothenburg-lexicon-config` at `/config` for disposable UI configuration and runtime state
 
-The host home directory is mounted at `/hemma-home`. Set `HEMMA_HOME_PATH` if it is not `/home/paunchygent`.
+The names remain for continuity; they do not define application scope. The host home is mounted read/write at `/hemma-home`.
 
-Expected workshop paths inside the container:
+Known dataset shortcuts:
 
 ```text
+/config/workspace/materials/data/ELLIPSE_promoted_scorer_input_v1/texts/train
+/config/workspace/materials/data/ELLIPSE_promoted_scorer_input_v1/texts/test
+/config/workspace/materials/data/HuleEdu_private_catalog_active_students_v1/essays
 /config/workspace/materials/data/ICNALE_500_merged_clean_texts/ICNALE_500_merged_clean
-/config/workspace/output
-/config/workspace/tools/taales_2.2/TAALES_2.2
 ```
 
-## Deploy on Hemma
+The ELLIPSE export contains 5,468 training and 2,567 test essays. The private cohort contains 243 essays. Keep input and results under `/hemma-home` or `/config/workspace`; both survive disposable UI resets.
+
+## Deploy and connect
+
+On Hemma:
 
 ```bash
 git clone https://github.com/paunchygent/sophistication-feature-processing-hemma.git
@@ -39,41 +44,34 @@ cd sophistication-feature-processing-hemma
 ./scripts/deploy-hemma.sh
 ```
 
-Place the upstream workshop materials in the workspace volume before analysis. Download TAALES 2.2 for Linux from the official tool site, put its executable at the expected path above, and make it executable.
-
-## Connect from macOS
+On the Mac:
 
 ```bash
 ./macos/Workshop-Tunnel.command
 ```
 
-Then use `http://127.0.0.1:13000/`. Keep the terminal running while using the desktop.
+The existing script name is retained for local compatibility. It opens the service only after its loopback tunnel responds.
 
-The tunnel helper uses the existing SSH alias `hemma` by default; set `WORKSHOP_SSH_ALIAS` to override it. The alias owns the user, host, and key selection. Keep `LocalForward` out of that alias because the helper owns the two loopback forwards. The script opens `http://127.0.0.1:13000/` only after the forwarded service responds.
+## TAALED result contract
 
-## Using the tools
+Choose a flat directory containing lowercase `.txt` files, select indices, and run. Each run writes to a new timestamped folder. A completed folder contains `taaled.csv`, `run.json`, and a worker log. Failed or interrupted work stays in a `.incomplete` folder and is never presented as complete.
 
-The desktop provides `00 Start Here`, TAALED, TAALES, Workshop Files, Workshop Output, and Display and Fonts launchers. File pickers start at `/config/Navigation`, whose numbered links lead directly to workshop texts, smoke input, output, and materials. `90 Hemma Home` is the separate route to the server home mounted at `/hemma-home`.
+The engine currently loads spaCy once per process but calls it sequentially for every essay. Large-run throughput optimization and parity measurement are intentionally left for the architecture pass rather than guessed into this baseline.
 
-TAALED opens with the 500-text workshop folder and `/config/workspace/output/taaled` selected. Each run executes in an independent worker and publishes a new timestamped directory only after validation succeeds. A completed run contains `taaled.csv`, `run.json`, and a local worker log. A directory ending in `.incomplete` is deliberately retained evidence of an interrupted or failed run.
+## Verification
 
-TAALES is distributed upstream as a packaged binary rather than editable Linux source. Its route card shows copyable input and output paths, then its resize-only launcher enlarges and centers the legacy interface. The binary's own pickers must still be set manually. TAALES appends output names such as `results` to the proposed `taales-` prefix.
+Build and run the container test target:
 
-## Verified live behavior, 2026-09-15
+```bash
+docker build --target test -t sophistication-feature-processing:test .
+```
 
-- TAALED processed all 500 workshop essays and produced a 501-line CSV including the header.
-- The integrated independent worker processed a one-file smoke input and published a valid two-row, ten-column CSV plus a complete receipt.
-- No TAALED error log was produced.
-- The Webtop stream runs at 30 fps to reduce remote-desktop lag.
-- TAALED opens at `944x658` inside the ordinary `1024x768` Webtop desktop; its run/status footer remains outside the scroll area.
-- TAALES opens with all controls visible in a window capped at `900x1300` and bounded by the available screen.
-- The containerized Linux/X11 suite passes 26 tests; two optional historical-baseline comparisons are skipped when their archive is absent.
+The suite currently has 26 passing tests and two optional historical-reference comparisons that skip when their archive is absent.
 
-The generated results are deliberately outside Git.
+The original workshop-focused architect package remains under `docs/advisory/` as historical evidence, not current product authority.
 
-The original offline architect package is preserved under `docs/advisory/` as design evidence. Runtime paths in that snapshot describe the candidate layout; this README and `docs/START-HERE.txt` describe the integrated `/opt/workshop` image.
+## Upstream tools
 
-## Upstream material
-
-- [Workshop repository](https://github.com/scrosseye/goth_lexicon_workshop)
-- [TAALES official page](https://www.linguisticanalysistools.org/taales.html)
+- [Scott Crossley's workshop repository](https://github.com/scrosseye/goth_lexicon_workshop)
+- [TAALES](https://www.linguisticanalysistools.org/taales.html)
+- [JASP](https://jasp-stats.org/download/)

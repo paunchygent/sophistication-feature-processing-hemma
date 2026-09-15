@@ -1,42 +1,38 @@
 from pathlib import Path
 import importlib.util
-import pytest
 from conftest import SUPPORT
+
 spec = importlib.util.spec_from_file_location('navigation_installer', SUPPORT / 'bin/install-navigation.py')
 nav = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(nav)
 
 
-def test_plan_apply_idempotence_and_selective_rollback(paths, capsys):
-    nav.apply(paths, SUPPORT, False)
-    assert not paths.navigation.exists()
-    nav.apply(paths, SUPPORT, True)
-    nav.apply(paths, SUPPORT, True)
-    assert (paths.navigation / '10 Workshop Texts').resolve() == paths.input
-    assert not any('hemma-home' in str(p.resolve()) for p in paths.navigation.iterdir())
-    modified = paths.home / 'Desktop/gothenburg-start.desktop'
-    modified.write_text(modified.read_text() + '# operator modification\n')
-    nav.rollback(paths)
-    assert modified.exists()
-    assert not (paths.navigation / '10 Workshop Texts').exists()
-    assert not (paths.home / 'Desktop/gothenburg-taaled.desktop').exists()
+def test_navigation_is_general_and_idempotent(paths):
+    paths.ellipse_train.mkdir(parents=True)
+    paths.ellipse_test.mkdir(parents=True)
+    paths.private_cohort.mkdir(parents=True)
+    nav.apply(paths)
+    nav.apply(paths)
+    assert (paths.navigation / '00 Hemma Home').resolve() == paths.browse_root
+    assert (paths.navigation / '10 ELLIPSE train').resolve() == paths.ellipse_train
+    assert (paths.navigation / '20 Private cohort').resolve() == paths.private_cohort
+    assert (paths.navigation / '30 Workshop texts').resolve() == paths.input
 
 
-def test_preexisting_navigation_is_preserved(paths):
+def test_missing_optional_dataset_is_not_invented(paths):
+    nav.apply(paths)
+    assert not (paths.navigation / '10 ELLIPSE train').exists()
+
+
+def test_existing_navigation_is_preserved(paths):
     paths.navigation.mkdir(parents=True)
-    conflict = paths.navigation / '10 Workshop Texts'
+    conflict = paths.navigation / '00 Hemma Home'
     conflict.mkdir()
     (conflict / 'keep.txt').write_text('private preexisting content')
-    with pytest.raises(ValueError, match='conflicts'):
-        nav.apply(paths, SUPPORT, True)
+    try:
+        nav.apply(paths)
+    except ValueError as exc:
+        assert 'already exists' in str(exc)
+    else:
+        raise AssertionError('expected a collision')
     assert (conflict / 'keep.txt').read_text() == 'private preexisting content'
-    assert not (paths.home / 'Desktop').exists()
-
-
-def test_preexisting_identical_items_not_claimed(paths):
-    paths.navigation.mkdir(parents=True)
-    link = paths.navigation / '10 Workshop Texts'
-    link.symlink_to(paths.input)
-    nav.apply(paths, SUPPORT, True)
-    nav.rollback(paths)
-    assert link.is_symlink()

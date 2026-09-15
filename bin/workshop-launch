@@ -7,10 +7,19 @@ HOME_ROOT=${WORKSHOP_HOME:-/config}
 PYTHON=${WORKSHOP_PYTHON:-/opt/taaled-venv/bin/python}
 case "${1:-}" in
   start) exec xdg-open "$SUPPORT/docs/START-HERE.txt" ;;
-  files) exec thunar "$HOME_ROOT/Navigation" ;;
+  files) exec thunar "${FEATURE_BROWSE_ROOT:-/hemma-home}" ;;
+  data) exec thunar "$HOME_ROOT/Navigation" ;;
   output) exec thunar "$ROOT/output" ;;
-  display) exec xfce4-appearance-settings ;;
+  terminal) exec xterm ;;
   taaled) exec "$PYTHON" "$SUPPORT/app/taaled/workshop_gui.py" ;;
   taales) exec "$PYTHON" "$SUPPORT/app/taaled/workshop_taales.py" ;;
-  *) printf 'Usage: %s {start|files|output|display|taaled|taales}\n' "$0" >&2; exit 64 ;;
+  jasp)
+    if command -v flatpak >/dev/null 2>&1 && flatpak info --user org.jaspstats.JASP >/dev/null 2>&1; then
+      exec flatpak run --user org.jaspstats.JASP
+    fi
+    printf 'JASP is not runnable in this container runtime. See the workstation README.\n' >&2
+    exit 69
+    ;;
+  suite) exec "$PYTHON" "$SUPPORT/app/suite_launcher.py" ;;
+  *) printf 'Usage: %s {start|files|data|output|terminal|taaled|taales|jasp|suite}\n' "$0" >&2; exit 64 ;;
 esac

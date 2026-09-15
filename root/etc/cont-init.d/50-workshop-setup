@@ -1,36 +1,15 @@
 #!/usr/bin/with-contenv bash
 set -euo pipefail
 
-input_dir=/config/workspace/materials/data/ICNALE_500_merged_clean_texts/ICNALE_500_merged_clean
-output_dir=/config/workspace/output
-state_dir=/config/.local/state/gothenburg-workshop
-legacy_dir="$state_dir/pre-candidate-shortcuts"
+workspace=/config/workspace
+state=/config/.local/state/sophistication-feature-processing
 
-mkdir -p /config/Desktop /config/Navigation "$input_dir" "$output_dir/taaled" "$output_dir/taales" \
-  /config/workspace/materials /config/workspace/smoke-input \
-  "$legacy_dir/Desktop" "$legacy_dir/Navigation"
+mkdir -p /config/Navigation "$state" "$workspace/output/taaled" "$workspace/output/taales" \
+  "$workspace/materials" "$workspace/smoke-input"
 
-if [[ ! -e /config/workspace/smoke-input/example.txt ]]; then
-  cp /opt/workshop/fixtures/smoke-input/example.txt /config/workspace/smoke-input/example.txt
+if [[ ! -e "$workspace/smoke-input/example.txt" ]]; then
+  cp /opt/workshop/fixtures/smoke-input/example.txt "$workspace/smoke-input/example.txt"
 fi
 
-# Preserve shortcuts from the first repository version instead of deleting them.
-for name in Hemma-Home.desktop TAALED-1.4.1.desktop TAALES-2.2.desktop Workshop-Files.desktop; do
-  if [[ -f "/config/Desktop/$name" && ! -e "$legacy_dir/Desktop/$name" ]]; then
-    mv "/config/Desktop/$name" "$legacy_dir/Desktop/$name"
-  fi
-done
-
-for name in "Hemma Home" "All Workshop Files" "Workshop Texts" "Workshop Output"; do
-  if [[ -L "/config/Navigation/$name" && ! -e "$legacy_dir/Navigation/$name" ]]; then
-    mv "/config/Navigation/$name" "$legacy_dir/Navigation/$name"
-  fi
-done
-
-/opt/taaled-venv/bin/python /opt/workshop/bin/install-navigation.py --apply
-
-ln -sfn /hemma-home "/config/Navigation/90 Hemma Home"
-
-# Runtime state and generated results belong to the unprivileged desktop user.
-chown -R abc:abc "$state_dir"
-chown abc:abc "$output_dir/taaled" "$output_dir/taales"
+/opt/taaled-venv/bin/python /opt/workshop/bin/install-navigation.py
+chown -R abc:abc "$state" "$workspace/output/taaled" "$workspace/output/taales" /config/Navigation

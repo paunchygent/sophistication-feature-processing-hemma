@@ -34,7 +34,7 @@ def main():
     root.bind("<Button-5>", lambda e: canvas.yview_scroll(3, "units"))
     destination = paths.output / "taales" / new_run_id()
     child = None
-    input_path = tk.StringVar(value=str(paths.input))
+    input_path = tk.StringVar(value=str(paths.browse_root))
     output_path = tk.StringVar(value=str(destination / "taales-"))
     status = tk.StringVar(value="The binary's input and output pickers must be set manually.")
 
@@ -50,7 +50,12 @@ def main():
         ttk.Button(frame, text="Copy path", command=lambda: copy(value)).pack(anchor="w", pady=(6, 0))
 
     field("1. Input folder — select inside TAALES", input_path)
-    ttk.Button(box, text="Use smoke input", command=lambda: input_path.set(str(paths.workspace / "smoke-input"))).pack(anchor="w")
+    presets = ttk.Frame(box)
+    presets.pack(fill="x")
+    for label, path in (("ELLIPSE train", paths.ellipse_train), ("ELLIPSE test", paths.ellipse_test),
+                        ("Private cohort", paths.private_cohort), ("Workshop texts", paths.input),
+                        ("Smoke input", paths.workspace / "smoke-input")):
+        ttk.Button(presets, text=label, command=lambda value=path: input_path.set(str(value))).pack(side="left", padx=(0, 6))
     field("2. Results filename — select inside TAALES", output_path)
 
     def launch():
