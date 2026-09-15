@@ -36,8 +36,10 @@ fi
 
 /opt/taaled-venv/bin/python /opt/workshop/bin/install-navigation.py
 chown abc:abc /config/Desktop
-install -o abc -g abc -m 0755 /defaults/hemma-home.desktop "/config/Desktop/Hemma Home.desktop"
-install -o abc -g abc -m 0755 /usr/share/applications/hemma-research.desktop "/config/Desktop/Hemma Research.desktop"
+# Desktop icons are Type=Link shortcuts to the installed /usr/share entries: libfm-qt
+# trusts those without gvfs metadata, so no execute prompt and no warning emblem.
+install -o abc -g abc -m 0644 /defaults/hemma-home-link.desktop "/config/Desktop/Hemma Home.desktop"
+install -o abc -g abc -m 0644 /defaults/hemma-research-link.desktop "/config/Desktop/Hemma Research.desktop"
 cp /defaults/lxqt-session.conf /config/.config/lxqt/session.conf
 cp /defaults/lxqt-panel.conf /config/.config/lxqt/panel.conf
 cp /defaults/pcmanfm-settings.conf /config/.config/pcmanfm-qt/lxqt/settings.conf

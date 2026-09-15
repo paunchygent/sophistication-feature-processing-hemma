@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Link
+Name=Hemma Home
+Comment=Browse the researcher's host home, not disposable container settings
+Icon=user-home
+URL=/usr/share/applications/hemma-home.desktop
