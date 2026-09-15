@@ -6,9 +6,18 @@ umask 077
 ACTION=${1:-start}
 ALIAS=${WORKSHOP_SSH_ALIAS:-hemma}
 case "$ALIAS" in ''|-*|*[!A-Za-z0-9._-]*) echo 'Use a simple local SSH alias.' >&2; exit 64;; esac
-CACHE="$HOME/Library/Caches/gothenburg-workshop"
+USER_ID=$(/usr/bin/id -u)
+CACHE="/tmp/gothenburg-workshop-$USER_ID"
+if [ -e "$CACHE" ] && [ ! -d "$CACHE" ]; then
+  echo "Tunnel control path is not a directory: $CACHE" >&2
+  exit 1
+fi
 mkdir -p "$CACHE"
 chmod 700 "$CACHE"
+if [ "$(/usr/bin/stat -f '%u' "$CACHE")" != "$USER_ID" ]; then
+  echo "Tunnel control directory is owned by another user: $CACHE" >&2
+  exit 1
+fi
 SOCKET="$CACHE/tunnel-%C"
 check() { /usr/bin/ssh -S "$SOCKET" -O check "$ALIAS" >/dev/null 2>&1; }
 probe() {
