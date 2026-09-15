@@ -2,7 +2,7 @@
 from pathlib import Path
 import subprocess
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import font, messagebox, ttk
 
 SUPPORT = Path(__file__).resolve().parents[1]
 LAUNCH = SUPPORT / "bin/workshop-launch"
@@ -11,8 +11,11 @@ LAUNCH = SUPPORT / "bin/workshop-launch"
 def main():
     root = tk.Tk()
     root.title("Sophistication Feature Processing")
-    root.geometry("620x500+32+42")
-    root.minsize(520, 420)
+    root.geometry("700x680+32+42")
+    root.minsize(620, 600)
+    for name in ("TkDefaultFont", "TkTextFont", "TkMenuFont", "TkHeadingFont"):
+        font.nametofont(name, root=root).configure(size=12)
+    ttk.Style(root).configure("TButton", padding=(12, 7))
     frame = ttk.Frame(root, padding=24)
     frame.pack(fill="both", expand=True)
     ttk.Label(frame, text="Sophistication Feature Processing",

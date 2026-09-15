@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import subprocess
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import font, messagebox, ttk
 
 from workshop_common import Paths, new_run_id
 
@@ -14,6 +14,9 @@ def main():
     binary = paths.workspace / "tools/taales_2.2/TAALES_2.2"
     window_launcher = Path(__file__).resolve().parents[2] / "bin/launch-taales-window"
     root = tk.Tk()
+    for name in ("TkDefaultFont", "TkTextFont", "TkMenuFont", "TkHeadingFont"):
+        font.nametofont(name, root=root).configure(size=12)
+    ttk.Style(root).configure("TButton", padding=(12, 7))
     root.title("TAALES 2.2 · Input and results")
     width, height = min(980, root.winfo_screenwidth() - 80), min(480, root.winfo_screenheight() - 110)
     root.geometry(f"{max(400, width)}x{max(300, height)}+24+32")

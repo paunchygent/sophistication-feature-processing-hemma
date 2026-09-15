@@ -180,13 +180,13 @@ class WorkshopApp:
         value = self.scale.get()
         self.root.tk.call("tk", "scaling", self.system_scaling if value == "System" else int(value) / 72.0)
         for name in ("TkDefaultFont", "TkTextFont", "TkMenuFont", "TkHeadingFont"):
-            font.nametofont(name, root=self.root).configure(size=11)
+            font.nametofont(name, root=self.root).configure(size=12)
         if "WorkshopHeading" not in font.names(root=self.root):
             self.heading = font.Font(root=self.root, name="WorkshopHeading", exists=False,
                                      family=font.nametofont("TkDefaultFont", root=self.root).actual("family"),
-                                     size=17, weight="bold")
+                                     size=19, weight="bold")
         else:
-            font.nametofont("WorkshopHeading", root=self.root).configure(size=17)
+            font.nametofont("WorkshopHeading", root=self.root).configure(size=19)
 
     def apply_scale(self, event=None):
         self._set_fonts()
