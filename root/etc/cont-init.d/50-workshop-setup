@@ -1,0 +1,29 @@
+#!/usr/bin/with-contenv bash
+set -euo pipefail
+
+input_dir=/config/workspace/materials/data/ICNALE_500_merged_clean_texts/ICNALE_500_merged_clean
+output_dir=/config/workspace/output
+
+mkdir -p /config/Desktop /config/Navigation "$output_dir"
+cp /opt/workshop/desktop/*.desktop /config/Desktop/
+chmod 755 /config/Desktop/*.desktop
+
+ln -sfn /hemma-home "/config/Navigation/Hemma Home"
+ln -sfn /config/workspace "/config/Navigation/All Workshop Files"
+ln -sfn "$input_dir" "/config/Navigation/Workshop Texts"
+ln -sfn "$output_dir" "/config/Navigation/Workshop Output"
+ln -sfn "$input_dir" /workshop-input
+ln -sfn "$output_dir" /workshop-output
+
+cat > /config/Desktop/START-HERE.txt <<'EOF'
+LEXICAL ANALYSIS WORKSHOP
+
+TAALED opens with Workshop Texts and Workshop Output preselected.
+
+TAALES is an upstream packaged binary. In its file chooser, select:
+  Input:  /workshop-input
+  Output: /workshop-output/taales-
+
+The TAALES application appends names such as "results" to the output prefix.
+Use the desktop shortcuts to browse Hemma Home or all Workshop Files.
+EOF
