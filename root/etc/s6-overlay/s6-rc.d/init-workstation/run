@@ -4,8 +4,10 @@ set -euo pipefail
 workspace=${WORKSHOP_ROOT:-/config/workspace}
 state=/config/.local/state/sophistication-feature-processing
 
-# Xvfb and its clients share a private cookie. FamilyWild permits different
-# host/container hostnames; possession of the 0600 cookie is still required.
+# Xvfb and its clients share a private cookie. The FamilyLocal entry names the
+# container hostname: python-xlib clients such as Selkies input match only that exact
+# family. The FamilyWild copy serves host clients with another hostname, such as
+# JASP. Possession of the 0600 cookie is still required for both.
 # The inherited -ac switch is removed at build time; X11 TCP stays disabled.
 auth=/run/workstation-xauth
 mkdir -p "$auth"
@@ -15,7 +17,8 @@ raw=$(mktemp "$auth/.raw.XXXXXX")
 final=$(mktemp "$auth/.cookie.XXXXXX")
 trap 'rm -f "$raw" "$final"' EXIT
 xauth -f "$raw" add :1 MIT-MAGIC-COOKIE-1 "$(python3 -c 'import secrets; print(secrets.token_hex(16))')"
-xauth -f "$raw" nlist | sed 's/^..../ffff/' | xauth -f "$final" nmerge -
+{ xauth -f "$raw" nlist; xauth -f "$raw" nlist | sed 's/^..../ffff/'; } | xauth -f "$final" nmerge -
+[[ $(xauth -f "$final" nlist | wc -l) -eq 2 ]]
 [[ -s "$final" ]]
 chmod 600 "$final"
 chown abc:abc "$auth" "$final"
