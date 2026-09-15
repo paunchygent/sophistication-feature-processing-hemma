@@ -49,7 +49,7 @@ Place the upstream workshop materials in the workspace volume before analysis. D
 
 Then use `http://127.0.0.1:13000/`. Keep the terminal running while using the desktop.
 
-The tunnel helper expects an SSH alias named `hemma-workshop`; the alias owns the user, host, and key selection. Keep `LocalForward` out of that alias because the helper owns the two loopback forwards. The script opens `http://127.0.0.1:13000/` only after the forwarded service responds.
+The tunnel helper uses the existing SSH alias `hemma` by default; set `WORKSHOP_SSH_ALIAS` to override it. The alias owns the user, host, and key selection. Keep `LocalForward` out of that alias because the helper owns the two loopback forwards. The script opens `http://127.0.0.1:13000/` only after the forwarded service responds.
 
 ## Using the tools
 

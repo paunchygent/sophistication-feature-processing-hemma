@@ -4,7 +4,7 @@
 set -euo pipefail
 umask 077
 ACTION=${1:-start}
-ALIAS=${WORKSHOP_SSH_ALIAS:-hemma-workshop}
+ALIAS=${WORKSHOP_SSH_ALIAS:-hemma}
 case "$ALIAS" in ''|-*|*[!A-Za-z0-9._-]*) echo 'Use a simple local SSH alias.' >&2; exit 64;; esac
 CACHE="$HOME/Library/Caches/gothenburg-workshop"
 mkdir -p "$CACHE"
