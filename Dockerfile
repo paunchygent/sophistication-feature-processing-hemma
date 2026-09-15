@@ -1,7 +1,7 @@
 FROM lscr.io/linuxserver/webtop@sha256:c4ceafc1c48ed9a61771345c74568d3bff6438802f0d89e9ebd9846e8404f696 AS runtime
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3-tk python3-venv xdotool x11-apps \
+    && apt-get install -y --no-install-recommends lxqt-core python3-tk python3-venv xdotool x11-apps \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /opt/workshop/requirements.txt
@@ -10,6 +10,7 @@ RUN python3 -m venv /opt/taaled-venv \
     && /opt/taaled-venv/bin/pip install --no-cache-dir -r /opt/workshop/requirements.txt
 
 COPY app /opt/workshop/app
+COPY assets /opt/workshop/assets
 COPY bin /opt/workshop/bin
 COPY docs /opt/workshop/docs
 COPY fixtures /opt/workshop/fixtures

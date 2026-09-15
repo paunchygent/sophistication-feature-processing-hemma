@@ -23,6 +23,8 @@ RESULTS
   A .incomplete directory records an interrupted or failed run.
 
 REMOTE DESKTOP
-  Openbox replaces the incompatible XFCE/Glycin session. There is no recovery
-  watchdog. If the web page is disconnected, reload it; the container-side
+  LXQt provides the panel, desktop, and PCManFM-Qt file manager; Openbox manages
+  windows. Scott's portrait is the canary that this desktop loaded. This stack
+  replaces the incompatible XFCE/Glycin session. There is no recovery watchdog.
+  If the web page is disconnected, reload it; the container-side
   TAALED worker continues unless the container itself is restarted.

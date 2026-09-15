@@ -1,5 +1,4 @@
 #!/bin/bash
 set -e
 
-xsetroot -solid '#e9ecef'
-exec openbox-session
+exec dbus-launch --exit-with-session startlxqt
