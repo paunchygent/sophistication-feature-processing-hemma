@@ -41,6 +41,22 @@ class Paths:
                    Path(os.environ.get("WORKSHOP_HOME", "/config")).resolve())
 
     @property
+    def browse_root(self) -> Path:
+        return Path(os.environ.get("FEATURE_BROWSE_ROOT", "/hemma-home")).resolve()
+
+    @property
+    def ellipse_train(self) -> Path:
+        return self.workspace / "materials/data/ELLIPSE_promoted_scorer_input_v1/texts/train"
+
+    @property
+    def ellipse_test(self) -> Path:
+        return self.workspace / "materials/data/ELLIPSE_promoted_scorer_input_v1/texts/test"
+
+    @property
+    def private_cohort(self) -> Path:
+        return self.workspace / "materials/data/HuleEdu_private_catalog_active_students_v1/essays"
+
+    @property
     def input(self) -> Path:
         return self.workspace / INPUT_REL
 
@@ -58,7 +74,7 @@ class Paths:
 
     @property
     def state(self) -> Path:
-        return self.home / ".local/state/gothenburg-workshop"
+        return self.home / ".local/state/sophistication-feature-processing"
 
     @property
     def engine(self) -> Path:
@@ -120,7 +136,7 @@ def run_lock(state: Path) -> Iterator[None]:
         try:
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
-            raise AlreadyRunning("Another workshop TAALED worker is running") from exc
+            raise AlreadyRunning("Another TAALED worker is running") from exc
         yield
     finally:
         os.close(fd)
@@ -173,9 +189,9 @@ def validate_options(options: dict, basic_only: bool) -> dict:
 
 def validate_output_root(folder: Path, paths: Paths) -> Path:
     folder = folder.expanduser().resolve()
-    canonical = paths.output.resolve()
-    if folder != canonical and canonical not in folder.parents:
-        raise ValueError("Save workshop runs inside the Workshop Output folder")
+    allowed = (paths.output.resolve(), paths.browse_root.resolve())
+    if not any(folder == root or root in folder.parents for root in allowed):
+        raise ValueError("Save results under Hemma Home or the service output folder")
     return folder
 
 

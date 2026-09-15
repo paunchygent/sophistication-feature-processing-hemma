@@ -1,4 +1,4 @@
-"""Scrollable workshop GUI; the legacy engine remains the calculation owner."""
+"""Responsive TAALED GUI; the legacy engine remains the calculation owner."""
 from __future__ import annotations
 
 import json
@@ -32,13 +32,13 @@ class WorkshopApp:
         self.reflow_groups = []
         self.wrap_labels = []
         self.input_buttons = []
-        self.root.title("TAALED 1.4.1 · Gothenburg Workshop")
+        self.root.title("TAALED 1.4.1 · Sophistication Feature Processing")
         self.system_scaling = float(root.tk.call("tk", "scaling"))
         self.scale = tk.StringVar(value=str(prefs.get("scale", "System")))
         if self.scale.get() not in ("System", "96", "120", "144", "168", "192"):
             self.scale.set("System")
         self._set_fonts()
-        self.input = tk.StringVar(value=prefs.get("input", str(self.paths.input)))
+        self.input = tk.StringVar(value=prefs.get("input", ""))
         self.output = tk.StringVar(value=prefs.get("output", str(self.paths.taaled_output)))
         self.basic_only = tk.BooleanVar(value=bool(prefs.get("basic_only", False)))
         saved_options = prefs.get("options", {})
@@ -53,7 +53,8 @@ class WorkshopApp:
         ttk.Label(header, text="TAALED · Lexical Diversity", font="WorkshopHeading").pack(anchor="w")
         toolbar = ttk.Frame(header)
         toolbar.pack(fill="x", pady=(8, 0))
-        ttk.Button(toolbar, text="Workshop files", command=lambda: self.open_folder(self.paths.navigation)).pack(side="left")
+        ttk.Button(toolbar, text="Hemma Home", command=lambda: self.open_folder(self.paths.browse_root)).pack(side="left")
+        ttk.Button(toolbar, text="Data and results", command=lambda: self.open_folder(self.paths.navigation)).pack(side="left", padx=6)
         ttk.Button(toolbar, text="Instructions", command=self.instructions).pack(side="left", padx=6)
         ttk.Button(toolbar, text="Fit window", command=self.fit_window).pack(side="right")
         scale_row = ttk.Frame(header)
@@ -99,7 +100,10 @@ class WorkshopApp:
         self.path_entry(input_frame, self.input)
         input_buttons = ttk.Frame(input_frame)
         input_buttons.pack(fill="x", pady=(8, 0))
-        for label, command in (("Workshop texts", lambda: self.choose_input(self.paths.input)),
+        for label, command in (("ELLIPSE train", lambda: self.choose_input(self.paths.ellipse_train)),
+                               ("ELLIPSE test", lambda: self.choose_input(self.paths.ellipse_test)),
+                               ("Private cohort", lambda: self.choose_input(self.paths.private_cohort)),
+                               ("Workshop texts", lambda: self.choose_input(self.paths.input)),
                                ("Smoke input", lambda: self.choose_input(self.paths.workspace / "smoke-input")),
                                ("Choose folder…", self.browse_input)):
             button = ttk.Button(input_buttons, text=label, command=command)
@@ -217,16 +221,16 @@ class WorkshopApp:
         self.refresh_count()
 
     def browse_input(self):
-        initial = self.paths.navigation if self.paths.navigation.is_dir() else self.paths.workspace
+        initial = self.paths.browse_root if self.paths.browse_root.is_dir() else self.paths.workspace
         choice = filedialog.askdirectory(parent=self.root, initialdir=str(initial), mustexist=True,
                                          title="Select the folder containing the .txt files")
         if choice:  # Cancel preserves the previous selection.
             self.choose_input(Path(choice))
 
     def browse_output(self):
-        initial = self.paths.output if self.paths.output.is_dir() else self.paths.workspace
+        initial = self.paths.browse_root if self.paths.browse_root.is_dir() else self.paths.output
         choice = filedialog.askdirectory(parent=self.root, initialdir=str(initial), mustexist=True,
-                                         title="Select a parent folder inside Workshop Output")
+                                         title="Select a results parent under Hemma Home or service output")
         if choice:
             try:
                 self.output.set(str(validate_output_root(Path(choice), self.paths)))
@@ -262,7 +266,7 @@ class WorkshopApp:
         try:
             current = read_status(self.paths)
             if current.get("active"):
-                self.status.set("Another workshop analysis is running. This window will show its status.")
+                self.status.set("Another TAALED analysis is running. This window will show its status.")
                 return
             input_snapshot(Path(self.input.get()))
             options = validate_options({k: v.get() for k, v in self.options.items()}, self.basic_only.get())
@@ -324,10 +328,10 @@ class WorkshopApp:
         self.open_folder(self.current.get("run_directory", self.output.get()))
 
     def instructions(self):
-        messagebox.showinfo("Workshop instructions",
-            "1. Select Workshop texts or Smoke input. Check the displayed file count.\n\n"
-            "2. Results go into a new folder under Workshop Output.\n\n"
-            "3. Choose the workshop's word groups and indices, or explicitly choose basic counts only.\n\n"
+        messagebox.showinfo("TAALED instructions",
+            "1. Select any folder of .txt files. Hemma Home is the default browsing root; dataset buttons are optional shortcuts.\n\n"
+            "2. Results go into a new run folder under the selected parent.\n\n"
+            "3. Choose the required word groups and indices, or explicitly choose basic counts only.\n\n"
             "4. Run analysis. Only a completed run folder is a completed result.\n\n"
             "Closing this window does not stop its worker. Reopen TAALED to view status. A container restart "
             "can interrupt processing; preserve .incomplete output and start a new run.\n\n"

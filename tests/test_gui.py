@@ -69,6 +69,7 @@ def main(indir, outdir, options, *, input_files, progress_queue):
         writer.writerow(['filename','synthetic_value'])
         writer.writerows((Path(f).name, 1) for f in input_files)
 ''')
+    app.choose_input(paths.input)
     app.options['aw'].set(1)
     app.options['mattr'].set(1)
     app.start()

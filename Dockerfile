@@ -11,7 +11,6 @@ RUN python3 -m venv /opt/taaled-venv \
 
 COPY app /opt/workshop/app
 COPY bin /opt/workshop/bin
-COPY desktop /opt/workshop/desktop
 COPY docs /opt/workshop/docs
 COPY fixtures /opt/workshop/fixtures
 COPY root/ /
@@ -19,7 +18,8 @@ COPY root/ /
 RUN chmod 755 /opt/workshop/bin/workshop-launch \
     /opt/workshop/bin/launch-taales-window \
     /opt/workshop/bin/install-navigation.py \
-    /etc/cont-init.d/50-workshop-setup
+    /etc/cont-init.d/50-workshop-setup \
+    /defaults/startwm.sh
 
 FROM runtime AS test
 

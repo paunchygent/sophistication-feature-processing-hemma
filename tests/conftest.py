@@ -6,8 +6,11 @@ sys.path.insert(0, str(SUPPORT / 'app/taaled'))
 from workshop_common import Paths, OPTION_KEYS
 
 @pytest.fixture
-def paths(tmp_path):
+def paths(tmp_path, monkeypatch):
     paths = Paths(tmp_path / 'runtime workspace', tmp_path / 'config')
+    browse_root = tmp_path / 'hemma home'
+    browse_root.mkdir()
+    monkeypatch.setenv('FEATURE_BROWSE_ROOT', str(browse_root))
     paths.input.mkdir(parents=True)
     (paths.input / 'alpha.txt').write_text('Synthetic fixture text, not a workshop essay.\n')
     (paths.input / 'beta, quoted.txt').write_text('Another synthetic fixture text.\n')

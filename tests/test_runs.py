@@ -59,7 +59,7 @@ def test_options_require_explicit_meaning(options):
 def test_output_cannot_follow_symlink_out_of_canonical_tree(paths, tmp_path):
     link = paths.output / 'elsewhere'
     link.symlink_to(tmp_path, target_is_directory=True)
-    with pytest.raises(ValueError, match='inside'):
+    with pytest.raises(ValueError, match='Hemma Home'):
         validate_output_root(link, paths)
 
 
