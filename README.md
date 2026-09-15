@@ -68,6 +68,14 @@ To reconnect the `Hemma` and `Workshops` Finder volumes automatically after a ne
 
 The per-user LaunchAgent checks the SMB route once a minute. A missing mount is reopened in the background. A mounted but unresponsive share must fail two consecutive bounded probes before the helper performs a normal unmount and reconnect. It recognizes both the existing home-directory mountpoints and Finder's standard `/Volumes` locations. Finder and Keychain retain control of authentication; the helper stores only the server name and SMB username.
 
+To rotate the dedicated Samba password and save it directly in the macOS login Keychain for Finder, run:
+
+```bash
+./macos/Reset-Hemma-SMB-Password.command
+```
+
+The generated plaintext password is held only in process memory. Hemma retains Samba's password hash in the disposable SMB container configuration.
+
 ## Tool behavior
 
 TAALED uses the existing detached, locked worker and fresh run-directory publication. The engine now streams `nlp.pipe` with explicit batching and filename context. Defaults are `TAALED_BATCH_SIZE=64` and `TAALED_N_PROCESS=1`. Two/four-process experiments are explicit choices, not automatic scaling. The worker CLI also accepts `--batch-size` and `--n-process`.
