@@ -36,3 +36,15 @@ def test_existing_navigation_is_preserved(paths):
     else:
         raise AssertionError('expected a collision')
     assert (conflict / 'keep.txt').read_text() == 'private preexisting content'
+
+
+def test_owned_alias_repoints_without_touching_old_target(paths, tmp_path):
+    old = tmp_path / 'old target'
+    old.mkdir()
+    (old / 'keep.txt').write_text('durable content')
+    paths.navigation.mkdir(parents=True)
+    link = paths.navigation / '00 Hemma Home'
+    link.symlink_to(old, target_is_directory=True)
+    nav.apply(paths)
+    assert link.resolve() == paths.browse_root
+    assert (old / 'keep.txt').read_text() == 'durable content'

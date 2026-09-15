@@ -15,6 +15,8 @@ RUN apt-get update \
         qps \
         qterminal \
         x11-apps \
+        x11-utils \
+        xauth \
         xdotool \
     && rm -rf /var/lib/apt/lists/*
 
@@ -30,6 +32,8 @@ COPY docs /opt/workshop/docs
 COPY fixtures /opt/workshop/fixtures
 COPY root/ /
 
+RUN python3 /opt/workshop/bin/require-xauth.py
+
 RUN chmod 755 /opt/workshop/bin/workshop-launch \
     /opt/workshop/bin/launch-taales-window \
     /opt/workshop/bin/install-navigation.py \
@@ -44,4 +48,5 @@ RUN apt-get update \
     && /opt/taaled-venv/bin/pip install --no-cache-dir pytest==8.4.2
 
 COPY tests /opt/workshop/tests
+COPY host /opt/workshop/host
 RUN cd /opt/workshop && xvfb-run -a /opt/taaled-venv/bin/python -m pytest -q

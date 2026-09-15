@@ -11,7 +11,6 @@ import glob
 import json
 import os
 import tempfile
-from collections import Counter
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -190,6 +189,9 @@ def validate_options(options: dict, basic_only: bool) -> dict:
 def validate_output_root(folder: Path, paths: Paths) -> Path:
     folder = folder.expanduser().resolve()
     allowed = (paths.output.resolve(), paths.browse_root.resolve())
+    # Both mounts expose the same durable workspace; retain explicitly saved paths.
+    if os.environ.get("WORKSHOP_ROOT") == "/srv/hemma-workstation/workspace":
+        allowed += (Path("/config/workspace/output"), Path("/hemma-home"))
     if not any(folder == root or root in folder.parents for root in allowed):
         raise ValueError("Save results under Hemma Home or the service output folder")
     return folder
@@ -206,8 +208,8 @@ def validate_csv(path: Path, records: list[dict]) -> None:
             if len(row) != len(header):
                 raise ValueError("Results CSV has an incomplete or malformed row")
             names.append(row[0])
-    if Counter(names) != Counter(record["name"] for record in records):
-        raise ValueError("Results do not match the selected input files")
+    if names != [record["name"] for record in records]:
+        raise ValueError("Results do not match the selected input files in order")
 
 
 def read_status(paths: Paths) -> dict:

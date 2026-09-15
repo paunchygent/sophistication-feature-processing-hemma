@@ -16,8 +16,12 @@ if [[ -n "$window_id" ]]; then
   read -r screen_width screen_height < <(xdotool getdisplaygeometry)
   width=900
   height=1300
+  (( width > screen_width - 48 )) && width=$((screen_width - 48))
   (( height > screen_height - 120 )) && height=$((screen_height - 120))
+  (( width < 320 )) && width=320
+  (( height < 240 )) && height=240
   x=$(((screen_width - width) / 2))
+  (( x < 0 )) && x=0
   xdotool windowsize "$window_id" "$width" "$height"
   xdotool windowmove "$window_id" "$x" 70
   xdotool windowactivate --sync "$window_id"

@@ -18,7 +18,9 @@ import platform
 import glob
 import csv
 
-WORKSHOP_IO_REVISION = 1
+WORKSHOP_IO_REVISION = 2
+from contextlib import closing
+import time
 import math
 import traceback
 from collections import Counter
@@ -317,20 +319,34 @@ def _read_legacy_text(filename):
 		return source.read()
 
 
-def main(indir, outdir, var_dict, *, input_files=None, progress_queue=None):
+def _text_records(filenames):
+	# One open/read/normalize at a time; spaCy owns only its bounded prefetch.
+	for filename in filenames:
+		yield re.sub(r'\s+', ' ', _read_legacy_text(filename)), filename
+
+
+def main(indir, outdir, var_dict, *, input_files=None, progress_queue=None,
+		 batch_size=64, n_process=1):
 	# No Tk calls in the computational entry point. The workshop GUI validates
 	# on the UI thread; this entry also rejects incomplete CLI calls.
 	if not indir or not outdir:
 		raise ValueError("Input folder and output filename are required")
+	if type(batch_size) is not int or not 1 <= batch_size <= 256:
+		raise ValueError("batch_size must be an integer from 1 to 256")
+	if type(n_process) is not int or n_process not in (1, 2, 4):
+		raise ValueError("n_process must be 1, 2 or 4; never all host CPUs")
+	started = time.perf_counter()
 	report_queue = progress_queue if progress_queue is not None else dataQueue
 	report_queue.put("Loading language model…")
+	model_started = time.perf_counter()
 	import spacy
 	nlp = spacy.load('en_core_web_sm')
+	model_seconds = time.perf_counter() - model_started
 	report_queue.put("Language model ready. Preparing texts…")
 
 	#thus begins the text analysis portion of the program
-	adj_word_list = _read_legacy_text(resource_path("dep_files/adj_lem_list.txt")).split("\n")[:-1]
-	real_word_list = _read_legacy_text(resource_path("dep_files/real_words.txt")).split("\n")[:-1] #these are lowered
+	adj_word_list = frozenset(_read_legacy_text(resource_path("dep_files/adj_lem_list.txt")).split("\n")[:-1])
+	real_word_list = frozenset(_read_legacy_text(resource_path("dep_files/real_words.txt")).split("\n")[:-1]) #these are lowered
 
 	### THESE ARE PERTINENT FOR ALL IMPORTANT INDICES ####
 	noun_tags = ["NN", "NNS", "NNP", "NNPS"] #consider whether to identify gerunds
@@ -357,13 +373,11 @@ def main(indir, outdir, var_dict, *, input_files=None, progress_queue=None):
 		header_list.append(name)
 		index_list.append(index)
 
-	def tag_processor_spaCy(raw_text): #uses default spaCy 2.016
+	def tag_processor_spaCy(tagged_text): # Same token classification; annotation is batched upstream.
 
 		lemma_list = []
 		content_list = []
 		function_list = []
-
-		tagged_text = nlp(raw_text)
 
 		for sent in tagged_text.sents:
 			for token in sent:
@@ -626,6 +640,8 @@ def main(indir, outdir, var_dict, *, input_files=None, progress_queue=None):
 	filenames = list(input_files) if input_files is not None else sorted(glob.glob(os.path.join(indir, "*.txt")))
 	if not filenames:
 		raise ValueError("The input folder contains no visible lowercase .txt files")
+	if len({os.path.basename(f) for f in filenames}) != len(filenames):
+		raise ValueError("Input filenames must be unique within a run")
 	file_number = 0
 	if var_dict["indout"] == 1:
 		directory = outdir[:-4] + "_diagnostic/"
@@ -633,12 +649,20 @@ def main(indir, outdir, var_dict, *, input_files=None, progress_queue=None):
 		os.mkdir(directory)
 
 	nfiles = len(filenames)
-	file_counter = 1
-
-
-	with open(outdir, "x", encoding="utf-8", newline="") as outf:
+	completed = 0
+	reduce_seconds = 0.0
+	report_queue.put(f"Annotating texts: batch size {batch_size}, processes {n_process}…")
+	# Keep the full, pinned pipeline: dependency labels and sentence boundaries
+	# are used below. Do not disable the parser or swap in a sentencizer.
+	with open(outdir, "x", encoding="utf-8", newline="") as outf, closing(
+		nlp.pipe(_text_records(filenames), as_tuples=True,
+			 batch_size=batch_size, n_process=n_process)
+	) as documents:
 		writer = csv.writer(outf, lineterminator="\n")
-		for filename in filenames:
+		for file_counter, (tagged_text, filename) in enumerate(documents, 1):
+			reduce_started = time.perf_counter()
+			if file_counter > nfiles or filename != filenames[file_counter - 1]:
+				raise ValueError("Annotation stream changed input order or identity")
 
 			if system == "M" or system == "L":
 				simple_filename = filename.split("/")[-1]
@@ -657,19 +681,13 @@ def main(indir, outdir, var_dict, *, input_files=None, progress_queue=None):
 			#updates Program Status
 			filename1 = ("Processing: " + str(file_counter) + " of " + str(nfiles) + " files")
 			report_queue.put(filename1)
-			file_counter+=1
 
 			if system == "M" or system == "L":
 				filename_2 = filename.split("/")[-1]
 			elif system == "W":
 				filename_2 = filename.split("\\")[-1]
 
-			raw_text= _read_legacy_text(filename)
-			raw_text = re.sub(r'\s+',' ',raw_text)
-			#while "	 " in raw_text:
-				#raw_text = raw_text.replace("  ", " ")
-
-			refined_lemma_dict = tag_processor_spaCy(raw_text)
+			refined_lemma_dict = tag_processor_spaCy(tagged_text)
 
 			lemma_text_aw = refined_lemma_dict["lemma"]
 
@@ -803,10 +821,17 @@ def main(indir, outdir, var_dict, *, input_files=None, progress_queue=None):
 				writer.writerow(header_list)
 				file_number += 1
 			writer.writerow(index_list)
+			completed += 1
+			reduce_seconds += time.perf_counter() - reduce_started
 
-	nfiles = len(filenames)
+	if completed != nfiles:
+		raise ValueError("Annotation stream ended before all input files were processed")
 	finishmessage = ("Processed " + str(nfiles) + " Files")
 	report_queue.put(finishmessage)
+	return {"model_import_and_load_seconds": model_seconds,
+			"engine_wall_seconds": time.perf_counter() - started,
+			"parent_reduction_and_output_seconds": reduce_seconds,
+			"files": completed, "pipeline": list(nlp.pipe_names)}
 
 
 if __name__ == '__main__':

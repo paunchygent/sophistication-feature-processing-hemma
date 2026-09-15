@@ -1,0 +1,12 @@
+[Unit]
+Description=Hemma workstation JASP launch socket
+
+[Socket]
+ListenStream=%h/.local/state/hemma-workstation/bridge/jasp.sock
+SocketMode=0600
+DirectoryMode=0700
+Accept=yes
+RemoveOnStop=yes
+
+[Install]
+WantedBy=sockets.target

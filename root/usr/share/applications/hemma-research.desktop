@@ -1,0 +1,25 @@
+[Desktop Entry]
+Type=Application
+Name=Hemma Research Workstation
+Comment=TAALED, TAALES, JASP and Hemma Home
+Exec=/opt/workshop/bin/workshop-launch suite
+Icon=applications-science
+Terminal=false
+Categories=Science;Education;
+Actions=TAALED;TAALES;JASP;Home;
+
+[Desktop Action TAALED]
+Name=TAALED — lexical diversity
+Exec=/opt/workshop/bin/workshop-launch taaled
+
+[Desktop Action TAALES]
+Name=TAALES — lexical sophistication
+Exec=/opt/workshop/bin/workshop-launch taales
+
+[Desktop Action JASP]
+Name=JASP — statistics
+Exec=/opt/workshop/bin/workshop-launch jasp
+
+[Desktop Action Home]
+Name=Hemma Home
+Exec=/opt/workshop/bin/workshop-launch files

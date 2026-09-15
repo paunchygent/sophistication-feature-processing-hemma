@@ -10,16 +10,10 @@ case "${1:-}" in
   files) exec pcmanfm-qt "${FEATURE_BROWSE_ROOT:-/hemma-home}" ;;
   data) exec pcmanfm-qt "$HOME_ROOT/Navigation" ;;
   output) exec pcmanfm-qt "$ROOT/output" ;;
-  terminal) exec xterm ;;
+  terminal) cd "${FEATURE_BROWSE_ROOT:-/hemma-home}"; exec xterm ;;
   taaled) exec "$PYTHON" "$SUPPORT/app/taaled/workshop_gui.py" ;;
   taales) exec "$PYTHON" "$SUPPORT/app/taaled/workshop_taales.py" ;;
-  jasp)
-    if command -v flatpak >/dev/null 2>&1 && flatpak info --user org.jaspstats.JASP >/dev/null 2>&1; then
-      exec flatpak run --user org.jaspstats.JASP
-    fi
-    printf 'JASP is not runnable in this container runtime. See the workstation README.\n' >&2
-    exit 69
-    ;;
+  jasp) exec "$PYTHON" "$SUPPORT/app/jasp_client.py" ;;
   suite) exec "$PYTHON" "$SUPPORT/app/suite_launcher.py" ;;
   *) printf 'Usage: %s {start|files|data|output|terminal|taaled|taales|jasp|suite}\n' "$0" >&2; exit 64 ;;
 esac

@@ -6,24 +6,32 @@ services:
     image: sophistication-feature-processing-hemma:2026-09-15
     container_name: sophistication-feature-processing
     restart: unless-stopped
-    security_opt:
-      - seccomp=unconfined
     shm_size: 1gb
     environment:
       PUID: "1000"
       PGID: "1000"
       TZ: Europe/Stockholm
       TITLE: Sophistication Feature Processing
-      SELKIES_FRAMERATE: "30"
+      SELKIES_FRAMERATE: "${WORKSTATION_FRAMERATE:-30}"
+      SELKIES_USE_BROWSER_CURSORS: "true"
       SELKIES_MANUAL_WIDTH: "1920"
       SELKIES_MANUAL_HEIGHT: "1080"
       SELKIES_IS_MANUAL_RESOLUTION_MODE: "true"
       SELKIES_SCALING_DPI: "120"
       SELKIES_SECOND_SCREEN: "false"
       QT_SCALE_FACTOR: "1.25"
+      XAUTHORITY: /run/workstation-xauth/Xauthority
+      WORKSHOP_ROOT: /srv/hemma-workstation/workspace
+      TAALED_BATCH_SIZE: "${TAALED_BATCH_SIZE:-64}"
+      TAALED_N_PROCESS: "${TAALED_N_PROCESS:-1}"
+      PYTHONHASHSEED: "0"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      BLIS_NUM_THREADS: "1"
       WORKSHOP_ENGINE: /opt/workshop/app/taaled/TAALED_1_4_1_Hemma.py
       WORKSHOP_PYTHON: /opt/taaled-venv/bin/python
-      FEATURE_BROWSE_ROOT: /hemma-home
+      FEATURE_BROWSE_ROOT: ${HEMMA_HOME_PATH:-/home/paunchygent}
     ports:
       - 127.0.0.1:13000:3000
       - 127.0.0.1:13001:3001
@@ -31,6 +39,26 @@ services:
       - workshop-config:/config
       - workshop-workspace:/config/workspace
       - ${HEMMA_HOME_PATH:-/home/paunchygent}:/hemma-home:rw
+      # Canonical paths are identical for the container peers and host JASP.
+      - ${HEMMA_HOME_PATH:-/home/paunchygent}:${HEMMA_HOME_PATH:-/home/paunchygent}:rw
+      - workshop-workspace:/srv/hemma-workstation/workspace
+      # No host D-Bus, Docker control socket, credentials, TCP X11 or extra web port.
+      - type: bind
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${HEMMA_HOME_PATH:-/home/paunchygent}/.local/state/hemma-workstation/xauth
+        target: /run/workstation-xauth
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${HEMMA_HOME_PATH:-/home/paunchygent}/.local/state/hemma-workstation/bridge
+        target: /run/host-jasp
+        read_only: true
+        bind:
+          create_host_path: false
 
 volumes:
   workshop-config:

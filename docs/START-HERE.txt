@@ -1,30 +1,36 @@
-Sophistication Feature Processing on Hemma
-
-This is a general research workstation. It is not restricted to a workshop.
+Hemma Research Workstation
 
 HOME
-  Hemma Home opens /home/paunchygent from inside the container at /hemma-home.
-  File pickers start there.
+  Hemma Home opens /home/paunchygent. Choose any research folder there.
+  ELLIPSE, private-cohort and workshop buttons are optional conveniences.
 
 TOOLS
-  TAALED runs lexical-diversity analysis in a detached worker.
-  TAALES opens its upstream interface plus a card with copyable paths.
-  JASP is a known runtime gap: Flatpak/Bubblewrap cannot create its namespaces
-  inside the current Docker/Webtop layer. The launcher reports this explicitly.
+  TAALED: choose a flat folder of lowercase .txt files, select indices and run.
+  Its worker continues after its GUI closes or the browser disconnects.
+  Reopen TAALED to view status; a container restart can interrupt that worker.
 
-DATA SHORTCUTS
-  ELLIPSE train and test, the private HuleEdu cohort, and workshop texts appear
-  under Data and results when those directories are installed. They are optional
-  conveniences; choose any suitable flat directory of lowercase .txt files.
+  TAALES: choose arbitrary paths on the route card, then copy them into the
+  actual upstream application's input and output pickers. The card cannot
+  choose for the binary or determine whether an analysis has completed.
+
+  JASP: launch from the suite or desktop application menu. The official
+  Flatpak runs on Hemma itself and displays in this same desktop. A launch
+  acknowledgement is not proof that its window or analysis has opened.
+  Use its ordinary Open/Save dialogs. Save before restarting the workstation.
 
 RESULTS
-  Save under Hemma Home or the durable service workspace. TAALED creates a new
-  run directory and only publishes it as complete after checking the CSV rows.
-  A .incomplete directory records an interrupted or failed run.
+  Save under /home/paunchygent or /srv/hemma-workstation/workspace.
+  The latter is the existing durable service volume, not a second copy.
+  Existing /hemma-home and /config/workspace aliases remain available in
+  the container. The workspace and host home survive desktop-config resets.
 
-REMOTE DESKTOP
-  LXQt provides the panel, desktop, and PCManFM-Qt file manager; Openbox manages
-  windows. Scott's portrait is the canary that this desktop loaded. This stack
-  replaces the incompatible XFCE/Glycin session. There is no recovery watchdog.
-  If the web page is disconnected, reload it; the container-side
-  TAALED worker continues unless the container itself is restarted.
+  TAALED publishes a fresh completed folder only after checking its output.
+  A .incomplete folder is an interrupted or failed run, not completed results.
+  TAALES and JASP retain their own completion and save behavior.
+
+DESKTOP
+  LXQt supplies the panel, desktop and PCManFM-Qt. Openbox manages windows.
+  Scott's portrait remains the desktop canary. No XFCE recovery loop is used.
+  The Mac tunnel and http://127.0.0.1:13000/ route are unchanged.
+  Browser reconnect is different from restarting the container/X server:
+  the latter can terminate GUI applications and lose unsaved changes.
