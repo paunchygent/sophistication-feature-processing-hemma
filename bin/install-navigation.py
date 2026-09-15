@@ -25,9 +25,13 @@ def apply(paths: Paths) -> None:
     for link, target in desired(paths).items():
         if not target.is_dir():
             continue
-        if link.is_symlink() and os.readlink(link) == str(target):
-            continue
-        if link.exists() or link.is_symlink():
+        # These declared aliases are disposable UI state. Repoint only the link
+        # itself when the shared namespace changes; never touch its old target.
+        if link.is_symlink():
+            if os.readlink(link) == str(target):
+                continue
+            link.unlink()
+        elif link.exists():
             raise ValueError(f"Navigation item already exists: {link}")
         link.symlink_to(target, target_is_directory=True)
 

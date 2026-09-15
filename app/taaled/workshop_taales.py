@@ -3,9 +3,9 @@ import os
 from pathlib import Path
 import subprocess
 import tkinter as tk
-from tkinter import font, messagebox, ttk
+from tkinter import filedialog, font, messagebox, ttk
 
-from workshop_common import Paths, new_run_id
+from workshop_common import Paths, new_run_id, validate_output_root
 
 
 def main():
@@ -37,6 +37,7 @@ def main():
     root.bind("<Button-5>", lambda e: canvas.yview_scroll(3, "units"))
     destination = paths.output / "taales" / new_run_id()
     child = None
+    path_controls = []
     input_path = tk.StringVar(value=str(paths.browse_root))
     output_path = tk.StringVar(value=str(destination / "taales-"))
     status = tk.StringVar(value="The binary's input and output pickers must be set manually.")
@@ -52,14 +53,40 @@ def main():
         ttk.Entry(frame, textvariable=value, state="readonly").pack(fill="x")
         ttk.Button(frame, text="Copy path", command=lambda: copy(value)).pack(anchor="w", pady=(6, 0))
 
+    def choose_input():
+        choice = filedialog.askdirectory(parent=root, initialdir=str(paths.browse_root),
+                                         mustexist=True, title="Choose any input folder")
+        if choice:
+            input_path.set(choice)
+
+    def choose_output():
+        nonlocal destination
+        choice = filedialog.askdirectory(parent=root, initialdir=str(paths.browse_root),
+                                         mustexist=True, title="Choose a durable results parent")
+        if choice:
+            try:
+                parent = validate_output_root(Path(choice), paths)
+                destination = parent / new_run_id()
+                output_path.set(str(destination / "taales-"))
+            except ValueError as exc:
+                messagebox.showerror("Results folder", str(exc), parent=root)
+
     field("1. Input folder — select inside TAALES", input_path)
+    button = ttk.Button(box, text="Choose any input folder…", command=choose_input)
+    button.pack(anchor="w", pady=4)
+    path_controls.append(button)
     presets = ttk.Frame(box)
     presets.pack(fill="x")
-    for label, path in (("ELLIPSE train", paths.ellipse_train), ("ELLIPSE test", paths.ellipse_test),
+    for index, (label, path) in enumerate((("ELLIPSE train", paths.ellipse_train), ("ELLIPSE test", paths.ellipse_test),
                         ("Private cohort", paths.private_cohort), ("Workshop texts", paths.input),
-                        ("Smoke input", paths.workspace / "smoke-input")):
-        ttk.Button(presets, text=label, command=lambda value=path: input_path.set(str(value))).pack(side="left", padx=(0, 6))
-    field("2. Results filename — select inside TAALES", output_path)
+                        ("Smoke input", paths.workspace / "smoke-input"))):
+        button = ttk.Button(presets, text=label, command=lambda value=path: input_path.set(str(value)))
+        button.grid(row=index // 2, column=index % 2, sticky="w", padx=(0, 6), pady=3)
+        path_controls.append(button)
+    field("2. Results filename prefix — select inside TAALES", output_path)
+    button = ttk.Button(box, text="Choose results parent…", command=choose_output)
+    button.pack(anchor="w", pady=4)
+    path_controls.append(button)
 
     def launch():
         nonlocal child
@@ -83,6 +110,8 @@ def main():
                                          stdin=subprocess.DEVNULL, stdout=log, stderr=log,
                                          start_new_session=True)
             launch_button.state(["disabled"])
+            for control in path_controls:
+                control.state(["disabled"])
             status.set("TAALES launched. Copy these paths into its pickers. Keep this card open for copying.")
         except OSError as exc:
             messagebox.showerror("TAALES could not launch", str(exc), parent=root)

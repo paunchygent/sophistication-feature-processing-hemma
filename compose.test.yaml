@@ -1,0 +1,5 @@
+services:
+  workstation:
+    build:
+      target: test
+    image: sophistication-feature-processing-hemma:test

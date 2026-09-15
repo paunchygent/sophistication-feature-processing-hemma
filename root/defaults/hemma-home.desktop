@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Hemma Home
+Comment=Browse the researcher's host home, not disposable container settings
+Exec=/opt/workshop/bin/workshop-launch files
+Icon=user-home
+Terminal=false

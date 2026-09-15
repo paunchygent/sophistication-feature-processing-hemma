@@ -1,10 +1,29 @@
 #!/usr/bin/with-contenv bash
 set -euo pipefail
 
-workspace=/config/workspace
+workspace=${WORKSHOP_ROOT:-/config/workspace}
 state=/config/.local/state/sophistication-feature-processing
 
-mkdir -p /config/Navigation /config/.config/autostart /config/.config/lxqt /config/.config/openbox \
+# Xvfb and its clients share a private cookie. FamilyWild permits different
+# host/container hostnames; possession of the 0600 cookie is still required.
+# The inherited -ac switch is removed at build time; X11 TCP stays disabled.
+auth=/run/workstation-xauth
+mkdir -p "$auth"
+chmod 700 "$auth"
+umask 077
+raw=$(mktemp "$auth/.raw.XXXXXX")
+final=$(mktemp "$auth/.cookie.XXXXXX")
+trap 'rm -f "$raw" "$final"' EXIT
+xauth -f "$raw" add :1 MIT-MAGIC-COOKIE-1 "$(python3 -c 'import secrets; print(secrets.token_hex(16))')"
+xauth -f "$raw" nlist | sed 's/^..../ffff/' | xauth -f "$final" nmerge -
+[[ -s "$final" ]]
+chmod 600 "$final"
+chown abc:abc "$auth" "$final"
+mv -f "$final" "$auth/Xauthority"
+umask 022
+
+
+mkdir -p /config/Desktop /config/Navigation /config/.config/autostart /config/.config/lxqt /config/.config/openbox \
   /config/.config/pcmanfm-qt/lxqt "$state" "$workspace/output/taaled" "$workspace/output/taales" \
   "$workspace/materials" "$workspace/smoke-input"
 
@@ -13,6 +32,9 @@ if [[ ! -e "$workspace/smoke-input/example.txt" ]]; then
 fi
 
 /opt/taaled-venv/bin/python /opt/workshop/bin/install-navigation.py
+chown abc:abc /config/Desktop
+install -o abc -g abc -m 0755 /defaults/hemma-home.desktop "/config/Desktop/Hemma Home.desktop"
+install -o abc -g abc -m 0755 /usr/share/applications/hemma-research.desktop "/config/Desktop/Hemma Research.desktop"
 cp /defaults/lxqt-session.conf /config/.config/lxqt/session.conf
 cp /defaults/lxqt-panel.conf /config/.config/lxqt/panel.conf
 cp /defaults/pcmanfm-settings.conf /config/.config/pcmanfm-qt/lxqt/settings.conf
@@ -22,6 +44,7 @@ if [[ ! -f /config/.config/openbox/rc.xml ]]; then
   cp /etc/xdg/openbox/rc.xml /config/.config/openbox/rc.xml
 fi
 sed -i 's#<application class="\*"><maximized>yes</maximized></application>#<application class="\*"><maximized>no</maximized></application>#' /config/.config/openbox/rc.xml
-chown -R abc:abc "$state" "$workspace/output/taaled" "$workspace/output/taales" \
+chown abc:abc "$workspace/output/taaled" "$workspace/output/taales"
+chown -R abc:abc "$state" \
   /config/Navigation /config/.config/autostart /config/.config/lxqt /config/.config/openbox \
   /config/.config/pcmanfm-qt /config/.Xresources

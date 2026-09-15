@@ -1,0 +1,14 @@
+[Unit]
+Description=Host JASP for the Hemma research desktop
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/python3 /usr/local/libexec/hemma-jasp.py
+StandardInput=socket
+StandardOutput=journal
+StandardError=journal
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus
+WorkingDirectory=%h
+UMask=0077
+Restart=no
+KillMode=control-group

@@ -58,10 +58,10 @@ def test_sticky_run_and_scroll_access_at_small_geometry(app, dpi):
 
 
 def test_gui_close_reopen_observes_detached_worker(app, paths, monkeypatch):
-    paths.engine.write_text('''WORKSHOP_IO_REVISION = 1
+    paths.engine.write_text('''WORKSHOP_IO_REVISION = 2
 import time, csv
 from pathlib import Path
-def main(indir, outdir, options, *, input_files, progress_queue):
+def main(indir, outdir, options, *, input_files, progress_queue, batch_size=64, n_process=1):
     progress_queue.put('Synthetic delayed run')
     time.sleep(1.5)
     with open(outdir, 'x', newline='') as stream:

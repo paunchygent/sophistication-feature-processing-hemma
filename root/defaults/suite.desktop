@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Sophistication Feature Processing
+Name=Hemma Research Workstation
 Exec=/opt/workshop/bin/workshop-launch suite
 Terminal=false
 X-LXQt-Need-Tray=false

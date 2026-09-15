@@ -16,7 +16,7 @@ from workshop_common import (AlreadyRunning, atomic_json, input_snapshot, load_j
 
 class FakeEngine:
     @staticmethod
-    def main(indir, outdir, options, *, input_files, progress_queue):
+    def main(indir, outdir, options, *, input_files, progress_queue, batch_size=64, n_process=1):
         progress_queue.put('Synthetic engine processing')
         with open(outdir, 'x', newline='') as stream:
             writer = csv.writer(stream)
@@ -156,10 +156,10 @@ def test_final_directory_is_recovered_after_status_write_failure(paths, options,
 
 
 def test_sigkill_releases_lock_and_does_not_publish_partial_run(paths, options):
-    paths.engine.write_text('''WORKSHOP_IO_REVISION = 1
+    paths.engine.write_text('''WORKSHOP_IO_REVISION = 2
 import time
 from pathlib import Path
-def main(indir, outdir, options, *, input_files, progress_queue):
+def main(indir, outdir, options, *, input_files, progress_queue, batch_size=64, n_process=1):
     Path(outdir).write_text('filename,value\\nalpha.txt,')
     progress_queue.put('Synthetic worker waiting for kill')
     time.sleep(60)
