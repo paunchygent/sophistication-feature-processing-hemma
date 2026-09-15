@@ -60,6 +60,14 @@ On the Mac, keep using:
 
 The existing command filename and two forwards are unchanged. The separate Finder helper still opens the optional `Workshops` SMB share; it is not the general home-navigation contract.
 
+To reconnect the `Hemma` and `Workshops` Finder volumes automatically after a network drop, run once on the Mac:
+
+```bash
+./macos/Install-Hemma-SMB-Auto-Reconnect.command
+```
+
+The per-user LaunchAgent checks the SMB route once a minute. A missing mount is reopened in the background. A mounted but unresponsive share must fail two consecutive bounded probes before the helper performs a normal unmount and reconnect. It recognizes both the existing home-directory mountpoints and Finder's standard `/Volumes` locations. Finder and Keychain retain control of authentication; the helper stores only the server name and SMB username.
+
 ## Tool behavior
 
 TAALED uses the existing detached, locked worker and fresh run-directory publication. The engine now streams `nlp.pipe` with explicit batching and filename context. Defaults are `TAALED_BATCH_SIZE=64` and `TAALED_N_PROCESS=1`. Two/four-process experiments are explicit choices, not automatic scaling. The worker CLI also accepts `--batch-size` and `--n-process`.
