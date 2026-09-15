@@ -25,7 +25,8 @@ def package(output: Path) -> None:
         if not path.is_file():
             raise ValueError(f'Missing source file: {line}')
         allowed_names = {'Dockerfile', 'requirements.txt', 'workshop-launch',
-                         'launch-taales-window', '50-workshop-setup', '.gitignore'}
+                         'launch-taales-window', 'run', 'type', 'up', 'init-adduser',
+                         'init-workstation', '.gitignore'}
         if path.suffix.lower() not in {'.py', '.md', '.txt', '.json', '.desktop', '.command', '.sh', '.yaml'} and path.name not in allowed_names:
             raise ValueError(f'Unexpected file type: {line}')
         entries.append((relative.as_posix(), path))
