@@ -4,7 +4,8 @@ set -euo pipefail
 workspace=/config/workspace
 state=/config/.local/state/sophistication-feature-processing
 
-mkdir -p /config/Navigation /config/.config/openbox "$state" "$workspace/output/taaled" "$workspace/output/taales" \
+mkdir -p /config/Navigation /config/.config/autostart /config/.config/lxqt /config/.config/openbox \
+  /config/.config/pcmanfm-qt/lxqt "$state" "$workspace/output/taaled" "$workspace/output/taales" \
   "$workspace/materials" "$workspace/smoke-input"
 
 if [[ ! -e "$workspace/smoke-input/example.txt" ]]; then
@@ -12,10 +13,13 @@ if [[ ! -e "$workspace/smoke-input/example.txt" ]]; then
 fi
 
 /opt/taaled-venv/bin/python /opt/workshop/bin/install-navigation.py
-cp /defaults/openbox-autostart /config/.config/openbox/autostart
+cp /defaults/lxqt-session.conf /config/.config/lxqt/session.conf
+cp /defaults/pcmanfm-settings.conf /config/.config/pcmanfm-qt/lxqt/settings.conf
+cp /defaults/suite.desktop /config/.config/autostart/sophistication-feature-processing.desktop
 if [[ ! -f /config/.config/openbox/rc.xml ]]; then
   cp /etc/xdg/openbox/rc.xml /config/.config/openbox/rc.xml
 fi
 sed -i 's#<application class="\*"><maximized>yes</maximized></application>#<application class="\*"><maximized>no</maximized></application>#' /config/.config/openbox/rc.xml
 chown -R abc:abc "$state" "$workspace/output/taaled" "$workspace/output/taales" \
-  /config/Navigation /config/.config/openbox
+  /config/Navigation /config/.config/autostart /config/.config/lxqt /config/.config/openbox \
+  /config/.config/pcmanfm-qt

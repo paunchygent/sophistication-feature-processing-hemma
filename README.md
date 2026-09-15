@@ -6,13 +6,14 @@ The application is not tied to one workshop or dataset. File browsers start at t
 
 ## Current runnable baseline
 
-- Openbox is the desktop/window-manager layer. XFCE is deliberately bypassed because its GTK/Glycin icon-loader repeatedly aborts in this container, leaking X clients until the stream fails.
+- LXQt provides a thin Ubuntu desktop with an application menu, taskbar, desktop surface, and PCManFM-Qt file management. It uses Openbox for window management. XFCE is deliberately bypassed because its GTK/Glycin icon-loader repeatedly aborts in this container, leaking X clients until the stream fails.
+- Scott Crossley's portrait is the desktop canary: if the image is absent, the desktop layer has not initialized correctly.
 - TAALED has a responsive GUI and runs analysis in a detached single-run worker.
 - TAALES uses the unmodified upstream binary with a route card for copying input and output paths.
 - A suite launcher provides TAALED, TAALES, JASP, Hemma Home, dataset shortcuts, and a terminal.
 - JASP is represented, but is the remaining runtime gap: its official Linux Flatpak cannot create the required Bubblewrap namespaces inside this Webtop container. The launcher reports that failure plainly.
 
-No watchdog or automatic desktop recovery layer is installed. The current correction removes the crashing XFCE loop itself.
+No watchdog or automatic desktop recovery layer is installed. The current correction replaces the crashing XFCE layer itself.
 
 ## Data and results
 
