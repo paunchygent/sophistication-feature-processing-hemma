@@ -13,7 +13,9 @@ services:
       TZ: Europe/Stockholm
       TITLE: Sophistication Feature Processing
       SELKIES_FRAMERATE: "${WORKSTATION_FRAMERATE:-30}"
-      SELKIES_USE_BROWSER_CURSORS: "true"
+      # Server-rendered pointer: with browser cursors the input overlay hides the native
+      # pointer and no cursor image reached Safari or Chromium, so the mouse vanished.
+      SELKIES_USE_BROWSER_CURSORS: "false"
       SELKIES_MANUAL_WIDTH: "1920"
       SELKIES_MANUAL_HEIGHT: "1080"
       SELKIES_IS_MANUAL_RESOLUTION_MODE: "true"
