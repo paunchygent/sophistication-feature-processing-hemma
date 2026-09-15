@@ -28,5 +28,7 @@ services:
 volumes:
   workshop-config:
     name: gothenburg-lexicon-config
+    external: true
   workshop-workspace:
     name: gothenburg-lexicon-workspace
+    external: true
