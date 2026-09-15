@@ -66,7 +66,7 @@ To reconnect the `Hemma` and `Workshops` Finder volumes automatically after a ne
 ./macos/Install-Hemma-SMB-Auto-Reconnect.command
 ```
 
-The per-user LaunchAgent checks the SMB route once a minute. A missing mount is reopened in the background. A mounted but unresponsive share must fail two consecutive bounded probes before the helper performs a normal unmount and reconnect. It recognizes both the existing home-directory mountpoints and Finder's standard `/Volumes` locations. Finder and Keychain retain control of authentication; the helper stores only the server name and SMB username.
+The per-user LaunchAgent checks the SMB route once a minute. It mounts a missing `Hemma` or `Workshops` share without opening or navigating a Finder window. An existing mount is left to macOS SMB session reconnection and is never probed, unmounted or reopened by the helper. Finder and Keychain retain control of authentication; the helper stores only the server name and SMB username.
 
 To rotate the dedicated Samba password and save it directly in the macOS login Keychain for Finder, run:
 
