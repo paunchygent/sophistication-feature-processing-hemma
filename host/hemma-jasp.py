@@ -11,6 +11,7 @@ import sys
 
 APP = "org.jaspstats.JASP"
 WORKSPACE = Path("/srv/hemma-workstation/workspace")
+X11 = Path("/tmp/.X11-unix")  # Host bind mount of the owner's shared X socket directory.
 REQUEST = b"JASP/1\n"
 
 
@@ -39,6 +40,8 @@ def serve(connection, home=None):
         raise RuntimeError("Host Xauthority is missing")
     if subprocess.run(["/usr/bin/mountpoint", "-q", str(WORKSPACE)]).returncode:
         raise RuntimeError("The durable workspace bind mount is not active")
+    if subprocess.run(["/usr/bin/mountpoint", "-q", str(X11)]).returncode:
+        raise RuntimeError("The host X11 socket directory bind mount is not active")
     env = dict(os.environ, HOME=str(home), DISPLAY=":1", XAUTHORITY=str(auth))
     env.pop("WAYLAND_DISPLAY", None)
     # A single preflight, not a wait/retry loop. Do not open JASP on another display.

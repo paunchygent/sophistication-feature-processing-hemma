@@ -60,6 +60,15 @@ def test_xauth_build_patch_refuses_drift_and_preserves_tcp_off(tmp_path):
         helper.patch(launcher)
 
 
+def test_compose_x11_socket_directory_is_outside_snap_private_tmp():
+    # Snap Docker's daemon resolves bind sources in a private /tmp, so the shared X
+    # socket directory must come from owner state and appear as /tmp/.X11-unix inside.
+    text = (SUPPORT / 'compose.yaml').read_text()
+    assert 'source: /tmp/.X11-unix' not in text
+    assert 'source: ${HEMMA_HOME_PATH:-/home/paunchygent}/.local/state/hemma-workstation/x11' in text
+    assert '        target: /tmp/.X11-unix\n' in text
+
+
 def test_host_jasp_command_is_fixed_and_uses_no_sandbox_bypass():
     host = load('host_jasp', SUPPORT / 'host/hemma-jasp.py')
     command = host.command()

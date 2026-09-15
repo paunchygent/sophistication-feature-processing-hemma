@@ -48,7 +48,7 @@ On Hemma, as the intended desktop owner with a working systemd user session:
 
 Host prerequisites are listed in the setup script. Setup installs the official user Flatpak, verifies the selected release (reference: 0.98.1), tests native host sandbox creation, records application/runtime commits, exposes the **existing** local Docker volume through a systemd bind mount, installs the fixed launcher, and enables the user launch socket. It explicitly enables user lingering so a last SSH logout does not remove that socket or its user manager. It does not enable automatic JASP launching, restarting or updating.
 
-Reserve host X display `:1` for this workstation. The container exports only the local X11 socket and a private cookie; its inherited `-ac` option is removed at build time. No host Docker socket, D-Bus socket, SSH identity or TCP X11 listener is needed. A build-time mismatch in the inherited Xvfb script stops the build for reconciliation.
+Reserve host X display `:1` for this workstation. Snap Docker's daemon has a private `/tmp`, so the X socket directory is `~/.local/state/hemma-workstation/x11`: setup bind-mounts it at the host's `/tmp/.X11-unix` and Compose mounts the same directory at the container's `/tmp/.X11-unix`. The container exports only the local X11 socket and a private cookie; its inherited `-ac` option is removed at build time. No host Docker socket, D-Bus socket, SSH identity or TCP X11 listener is needed. A build-time mismatch in the inherited Xvfb script stops the build for reconciliation.
 
 PUID/PGID must match the host owner. The candidate retains baseline values 1000/1000. See the integration note before using another account or rootless Docker.
 

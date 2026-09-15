@@ -43,8 +43,10 @@ services:
       - ${HEMMA_HOME_PATH:-/home/paunchygent}:${HEMMA_HOME_PATH:-/home/paunchygent}:rw
       - workshop-workspace:/srv/hemma-workstation/workspace
       # No host D-Bus, Docker control socket, credentials, TCP X11 or extra web port.
+      # Snap Docker's daemon has a private /tmp, so the X socket directory lives in
+      # owner state; setup-jasp-host.sh bind-mounts it at the host's /tmp/.X11-unix.
       - type: bind
-        source: /tmp/.X11-unix
+        source: ${HEMMA_HOME_PATH:-/home/paunchygent}/.local/state/hemma-workstation/x11
         target: /tmp/.X11-unix
         bind:
           create_host_path: false
