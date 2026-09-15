@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Workshop Files
-Comment=Browse workshop materials, tools, and output
-Exec=thunar /config/workspace
-Terminal=false
-Icon=folder-documents

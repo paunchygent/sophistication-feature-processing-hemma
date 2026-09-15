@@ -6,11 +6,11 @@ The service runs an Ubuntu XFCE desktop on Hemma and is viewed from a Mac throug
 
 ## What this repository contains
 
-- A patched TAALED 1.4.1 UI with readable sizing, workshop input/output defaults, visible progress, guarded background processing, and an error log.
+- A responsive TAALED 1.4.1 UI with workshop routes, adjustable text DPI, a persistent status receipt, and an independent single-run worker.
 - A Webtop image and Compose service pinned to the tested upstream image digest.
 - Desktop navigation shortcuts for the workshop workspace and Hemma home directory.
-- A TAALES launcher that makes the complete legacy UI visible at a usable size.
-- A Mac SSH-tunnel helper.
+- A TAALES route card plus a resize-only launcher for the unmodified upstream binary.
+- Mac SSH-tunnel and Finder-share helpers that keep host names and credentials in local configuration.
 
 It intentionally excludes workshop essay bodies, generated CSV results, credentials, SSH material, the TAALES executable, and private Hemma files.
 
@@ -44,26 +44,34 @@ Place the upstream workshop materials in the workspace volume before analysis. D
 ## Connect from macOS
 
 ```bash
-./scripts/open-tunnel-macos.sh
+./macos/Workshop-Tunnel.command
 ```
 
 Then use `http://127.0.0.1:13000/`. Keep the terminal running while using the desktop.
 
+The tunnel helper expects an SSH alias named `hemma-workshop`; the alias owns the user, host, and key selection. Keep `LocalForward` out of that alias because the helper owns the two loopback forwards. The script opens `http://127.0.0.1:13000/` only after the forwarded service responds.
+
 ## Using the tools
 
-TAALED opens with the 500-text workshop folder and `/config/workspace/output/results.csv` preselected. Its status progresses from model loading through each processed file. Exceptions appear in the status area and are written to `output/taaled-error.log`.
+The desktop provides `00 Start Here`, TAALED, TAALES, Workshop Files, Workshop Output, and Display and Fonts launchers. File pickers start at `/config/Navigation`, whose numbered links lead directly to workshop texts, smoke input, output, and materials. `90 Hemma Home` is the separate route to the server home mounted at `/hemma-home`.
 
-TAALES is distributed upstream as a packaged binary rather than editable Linux source. Its launcher enlarges and centers the legacy interface. Choose `/workshop-input` as the input and `/workshop-output/taales-` as the output prefix; TAALES appends output names such as `results`.
+TAALED opens with the 500-text workshop folder and `/config/workspace/output/taaled` selected. Each run executes in an independent worker and publishes a new timestamped directory only after validation succeeds. A completed run contains `taaled.csv`, `run.json`, and a local worker log. A directory ending in `.incomplete` is deliberately retained evidence of an interrupted or failed run.
+
+TAALES is distributed upstream as a packaged binary rather than editable Linux source. Its route card shows copyable input and output paths, then its resize-only launcher enlarges and centers the legacy interface. The binary's own pickers must still be set manually. TAALES appends output names such as `results` to the proposed `taales-` prefix.
 
 ## Verified live behavior, 2026-09-15
 
 - TAALED processed all 500 workshop essays and produced a 501-line CSV including the header.
-- A separate one-file smoke run produced a two-line CSV.
+- The integrated independent worker processed a one-file smoke input and published a valid two-row, ten-column CSV plus a complete receipt.
 - No TAALED error log was produced.
 - The Webtop stream runs at 30 fps to reduce remote-desktop lag.
-- TAALES opens with all controls visible in a `900x1300` window.
+- TAALED opens at `944x658` inside the ordinary `1024x768` Webtop desktop; its run/status footer remains outside the scroll area.
+- TAALES opens with all controls visible in a window capped at `900x1300` and bounded by the available screen.
+- The containerized Linux/X11 suite passes 26 tests; two optional historical-baseline comparisons are skipped when their archive is absent.
 
 The generated results are deliberately outside Git.
+
+The original offline architect package is preserved under `docs/advisory/` as design evidence. Runtime paths in that snapshot describe the candidate layout; this README and `docs/START-HERE.txt` describe the integrated `/opt/workshop` image.
 
 ## Upstream material
 

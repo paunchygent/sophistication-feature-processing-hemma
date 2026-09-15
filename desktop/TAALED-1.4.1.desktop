@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=TAALED 1.4.1
-Comment=Lexical diversity analysis with workshop paths preselected
-Exec=/opt/taaled-venv/bin/python /opt/workshop/app/taaled/TAALED_1_4_1_Hemma.py
-Path=/opt/workshop/app/taaled
-Terminal=false
-Icon=accessories-text-editor
-StartupNotify=true

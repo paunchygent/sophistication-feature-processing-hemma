@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Workshop Files
+Comment=Input, smoke input, materials and outputs
+Exec="/opt/workshop/bin/workshop-launch" files
+Terminal=false
+Icon=system-file-manager
+Categories=Education;Science;
+Keywords=workshop;lexical;TAALES;TAALED;
+StartupNotify=false

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# No shell fragments in .desktop Exec fields. No credential or private-home reads.
+set -euo pipefail
+SUPPORT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+ROOT=${WORKSHOP_ROOT:-/config/workspace}
+HOME_ROOT=${WORKSHOP_HOME:-/config}
+PYTHON=${WORKSHOP_PYTHON:-/opt/taaled-venv/bin/python}
+case "${1:-}" in
+  start) exec xdg-open "$SUPPORT/docs/START-HERE.txt" ;;
+  files) exec thunar "$HOME_ROOT/Navigation" ;;
+  output) exec thunar "$ROOT/output" ;;
+  display) exec xfce4-appearance-settings ;;
+  taaled) exec "$PYTHON" "$SUPPORT/app/taaled/workshop_gui.py" ;;
+  taales) exec "$PYTHON" "$SUPPORT/app/taaled/workshop_taales.py" ;;
+  *) printf 'Usage: %s {start|files|output|display|taaled|taales}\n' "$0" >&2; exit 64 ;;
+esac

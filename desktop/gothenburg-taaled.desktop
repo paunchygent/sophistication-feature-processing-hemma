@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=TAALED 1.4.1
+Comment=Lexical diversity — workshop GUI
+Exec="/opt/workshop/bin/workshop-launch" taaled
+Terminal=false
+Icon=accessories-text-editor
+Categories=Education;Science;
+Keywords=workshop;lexical;TAALES;TAALED;
+StartupNotify=false

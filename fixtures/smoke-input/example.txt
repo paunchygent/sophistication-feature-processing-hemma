@@ -1,0 +1,1 @@
+The workshop smoke test uses this short synthetic text to verify the processing path.

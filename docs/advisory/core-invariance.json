@@ -1,0 +1,22 @@
+{
+  "baseline_sha256": "e268113aadfd7f2745fde4cf1717f3b9bcb774e07401d7a6824ded41549f565b",
+  "candidate_sha256": "1cc463a2cd6e49eebad9e3ff301fe29bcc9359ce22ad83b7f29ae0f19c01eaf9",
+  "unchanged_nested_functions": [
+    "safe_divide",
+    "indexer",
+    "tag_processor_spaCy",
+    "lex_density",
+    "ttr",
+    "simple_ttr",
+    "root_ttr",
+    "log_ttr",
+    "maas_ttr",
+    "mattr",
+    "msttr",
+    "hdd",
+    "mtld_original",
+    "mtld_bi_directional_ma",
+    "mtld_ma_wrap"
+  ],
+  "comparison": "Python AST excluding position attributes; not numerical equivalence proof"
+}

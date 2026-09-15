@@ -1,13 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-app=/config/workspace/tools/taales_2.2/TAALES_2.2
-
-if [[ ! -x "$app" ]]; then
-  xmessage -center "TAALES 2.2 is not installed at:\n$app\n\nSee START-HERE.txt on the desktop."
-  exit 1
-fi
-
+app=${1:?TAALES executable path is required}
 "$app" &
 app_pid=$!
 window_id=""
