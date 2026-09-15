@@ -37,7 +37,7 @@ RUN python3 /opt/workshop/bin/require-xauth.py
 RUN chmod 755 /opt/workshop/bin/workshop-launch \
     /opt/workshop/bin/launch-taales-window \
     /opt/workshop/bin/install-navigation.py \
-    /etc/cont-init.d/50-workshop-setup \
+    /etc/s6-overlay/s6-rc.d/init-workstation/run \
     /defaults/startwm.sh
 
 FROM runtime AS test

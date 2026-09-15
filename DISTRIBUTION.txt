@@ -30,7 +30,12 @@ docs/advisory/SHA256SUMS.json
 fixtures/smoke-input/example.txt
 macos/Workshop-Tunnel.command
 macos/Open-Workshop-Files.command
-root/etc/cont-init.d/50-workshop-setup
+root/etc/s6-overlay/s6-rc.d/init-workstation/run
+root/etc/s6-overlay/s6-rc.d/init-workstation/type
+root/etc/s6-overlay/s6-rc.d/init-workstation/up
+root/etc/s6-overlay/s6-rc.d/init-workstation/dependencies.d/init-adduser
+root/etc/s6-overlay/s6-rc.d/svc-xorg/dependencies.d/init-workstation
+root/etc/s6-overlay/s6-rc.d/user/contents.d/init-workstation
 scripts/deploy-hemma.sh
 tests/conftest.py
 tests/test_runs.py
