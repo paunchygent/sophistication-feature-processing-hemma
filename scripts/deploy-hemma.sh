@@ -11,6 +11,9 @@ home=${HEMMA_HOME_PATH:-/home/paunchygent}
 mountpoint -q /srv/hemma-workstation/workspace || {
   echo "The host's durable workspace bind mount is missing." >&2; exit 69;
 }
+mountpoint -q /tmp/.X11-unix || {
+  echo "The host's X11 socket directory bind mount is missing; rerun setup-jasp-host.sh." >&2; exit 69;
+}
 
 docker compose up -d --build --remove-orphans
 docker compose ps

@@ -49,4 +49,5 @@ RUN apt-get update \
 
 COPY tests /opt/workshop/tests
 COPY host /opt/workshop/host
+COPY compose.yaml /opt/workshop/compose.yaml
 RUN cd /opt/workshop && xvfb-run -a /opt/taaled-venv/bin/python -m pytest -q
