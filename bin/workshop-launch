@@ -7,9 +7,9 @@ HOME_ROOT=${WORKSHOP_HOME:-/config}
 PYTHON=${WORKSHOP_PYTHON:-/opt/taaled-venv/bin/python}
 case "${1:-}" in
   start) exec xdg-open "$SUPPORT/docs/START-HERE.txt" ;;
-  files) exec thunar "${FEATURE_BROWSE_ROOT:-/hemma-home}" ;;
-  data) exec thunar "$HOME_ROOT/Navigation" ;;
-  output) exec thunar "$ROOT/output" ;;
+  files) exec pcmanfm-qt "${FEATURE_BROWSE_ROOT:-/hemma-home}" ;;
+  data) exec pcmanfm-qt "$HOME_ROOT/Navigation" ;;
+  output) exec pcmanfm-qt "$ROOT/output" ;;
   terminal) exec xterm ;;
   taaled) exec "$PYTHON" "$SUPPORT/app/taaled/workshop_gui.py" ;;
   taales) exec "$PYTHON" "$SUPPORT/app/taaled/workshop_taales.py" ;;

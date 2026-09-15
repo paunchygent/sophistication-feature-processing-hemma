@@ -319,7 +319,7 @@ class WorkshopApp:
             messagebox.showinfo("Folder unavailable", f"This folder is not present: {path}", parent=self.root)
             return
         try:
-            subprocess.Popen(["thunar", str(path)], stdin=subprocess.DEVNULL,
+            subprocess.Popen(["pcmanfm-qt", str(path)], stdin=subprocess.DEVNULL,
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except OSError as exc:
             messagebox.showerror("File manager", str(exc), parent=self.root)
