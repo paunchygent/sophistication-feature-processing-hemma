@@ -15,8 +15,8 @@ services:
       TZ: Europe/Stockholm
       TITLE: Sophistication Feature Processing
       SELKIES_FRAMERATE: "30"
-      SELKIES_MANUAL_WIDTH: "1440"
-      SELKIES_MANUAL_HEIGHT: "900"
+      SELKIES_MANUAL_WIDTH: "1920"
+      SELKIES_MANUAL_HEIGHT: "1080"
       SELKIES_IS_MANUAL_RESOLUTION_MODE: "true"
       SELKIES_SCALING_DPI: "120"
       SELKIES_SECOND_SCREEN: "false"

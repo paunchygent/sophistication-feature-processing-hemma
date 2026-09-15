@@ -2,7 +2,7 @@
 
 A general-purpose, Tailscale-only graphical research workstation for TAALED, TAALES, and JASP. It runs on Hemma and is viewed from a Mac through an SSH tunnel at `http://127.0.0.1:13000/`.
 
-The streamed desktop is fixed at `1440x900` with 125% UI scaling for a 14-inch MacBook display. Browser-driven resolution changes are disabled so reconnects cannot silently return to an unnecessarily large canvas.
+The streamed desktop is fixed at `1920x1080` with 125% UI scaling for a 14-inch MacBook display. Browser-driven resolution changes are disabled so reconnects cannot silently change the canvas. The bottom panel uses the conventional application menu, running-applications taskbar, system tray, volume, clock, and show-desktop controls; the workspace switcher and empty quick-launch placeholder are removed.
 
 The application is not tied to one workshop or dataset. File browsers start at the host's `/home/paunchygent`, mounted as `/hemma-home`. ELLIPSE, the private HuleEdu cohort, and Scott Crossley's workshop files appear as optional shortcuts when present.
 
