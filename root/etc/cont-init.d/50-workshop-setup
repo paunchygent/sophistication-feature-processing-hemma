@@ -30,3 +30,7 @@ done
 /opt/taaled-venv/bin/python /opt/workshop/bin/install-navigation.py --apply
 
 ln -sfn /hemma-home "/config/Navigation/90 Hemma Home"
+
+# Runtime state and generated results belong to the unprivileged desktop user.
+chown -R abc:abc "$state_dir"
+chown abc:abc "$output_dir/taaled" "$output_dir/taales"
