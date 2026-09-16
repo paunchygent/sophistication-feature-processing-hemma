@@ -76,7 +76,8 @@ def test_host_jasp_command_is_fixed_and_uses_no_sandbox_bypass():
     assert '--env=QT_XCB_NO_MITSHM=1' in command
     assert '--filesystem=home' in command
     assert '--filesystem=/srv/hemma-workstation/workspace' in command
-    assert command[-2:] == ['org.jaspstats.JASP', '--safeGraphics']
+    assert command[-1] == 'org.jaspstats.JASP'
+    assert '--safeGraphics' not in command
     assert not any('no-sandbox' in value or 'privileged' in value for value in command)
 
 

@@ -20,7 +20,7 @@ def command():
     return ["/usr/bin/flatpak", "run", "--user", "--socket=x11", "--nosocket=wayland",
             "--filesystem=home", f"--filesystem={WORKSPACE}",
             "--env=QT_QPA_PLATFORM=xcb", "--env=QT_XCB_NO_MITSHM=1",
-            APP, "--safeGraphics"]
+            APP]
 
 
 def serve(connection, home=None):
