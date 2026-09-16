@@ -21,6 +21,7 @@ services:
       SELKIES_IS_MANUAL_RESOLUTION_MODE: "true"
       SELKIES_SCALING_DPI: "120"
       SELKIES_SECOND_SCREEN: "false"
+      DRI_NODE: /dev/dri/renderD129
       QT_SCALE_FACTOR: "1.25"
       XAUTHORITY: /run/workstation-xauth/Xauthority
       WORKSHOP_ROOT: /srv/hemma-workstation/workspace
@@ -37,6 +38,8 @@ services:
     ports:
       - 127.0.0.1:13000:3000
       - 127.0.0.1:13001:3001
+    devices:
+      - /dev/dri/renderD129:/dev/dri/renderD129
     volumes:
       - workshop-config:/config
       - workshop-workspace:/config/workspace
