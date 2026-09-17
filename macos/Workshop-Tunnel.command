@@ -1,25 +1,33 @@
 #!/bin/bash
-# The alias is resolved by LOCAL SSH configuration; no host/user/key is shipped.
-# Keep this SSH alias free of LocalForward entries: this script owns these two forwards.
+# The shared Hemma LaunchAgent owns every persistent local forward. This
+# shortcut only ensures that singleton is running, verifies the workstation,
+# and opens it. It never creates another SSH connection.
 set -euo pipefail
-umask 077
+
 ACTION=${1:-start}
-ALIAS=${WORKSHOP_SSH_ALIAS:-hemma}
-case "$ALIAS" in ''|-*|*[!A-Za-z0-9._-]*) echo 'Use a simple local SSH alias.' >&2; exit 64;; esac
-USER_ID=$(/usr/bin/id -u)
-CACHE="/tmp/gothenburg-workshop-$USER_ID"
-if [ -e "$CACHE" ] && [ ! -d "$CACHE" ]; then
-  echo "Tunnel control path is not a directory: $CACHE" >&2
-  exit 1
-fi
-mkdir -p "$CACHE"
-chmod 700 "$CACHE"
-if [ "$(/usr/bin/stat -f '%u' "$CACHE")" != "$USER_ID" ]; then
-  echo "Tunnel control directory is owned by another user: $CACHE" >&2
-  exit 1
-fi
-SOCKET="$CACHE/tunnel-%C"
-check() { /usr/bin/ssh -S "$SOCKET" -O check "$ALIAS" >/dev/null 2>&1; }
+DOMAIN="gui/$(/usr/bin/id -u)"
+LABEL=com.paunchygent.hemma-shared-tunnel
+PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+
+agent_loaded() { /bin/launchctl print "$DOMAIN/$LABEL" >/dev/null 2>&1; }
+listener_ready() { /usr/bin/nc -z -w 1 127.0.0.1 13000 >/dev/null 2>&1; }
+
+ensure_listener() {
+  if ! agent_loaded; then
+    echo "The shared Hemma tunnel is not installed. Run macos/Install-Hemma-Shared-Tunnel.command once." >&2
+    return 1
+  fi
+  if ! listener_ready; then
+    /bin/launchctl kickstart -k "$DOMAIN/$LABEL"
+    for _ in {1..100}; do
+      listener_ready && return 0
+      /bin/sleep 0.1
+    done
+    echo "The shared Hemma tunnel did not bind port 13000. Inspect $HOME/Library/Logs/hemma-shared-tunnel.log." >&2
+    return 1
+  fi
+}
+
 probe() {
   local code
   code=$(/usr/bin/curl --max-time 8 --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:13000/) || {
@@ -33,25 +41,18 @@ probe() {
 }
 case "$ACTION" in
   start)
-    if ! check; then
-      /usr/bin/ssh -M -S "$SOCKET" -fnNT \
-        -o ExitOnForwardFailure=yes -o ConnectTimeout=10 \
-        -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
-        -o Compression=no -o ForwardAgent=no -o ForwardX11=no \
-        -o StrictHostKeyChecking=yes -o ControlPersist=no \
-        -L 127.0.0.1:13000:127.0.0.1:13000 \
-        -L 127.0.0.1:13001:127.0.0.1:13001 "$ALIAS"
-    fi
+    ensure_listener
     probe
     /usr/bin/open http://127.0.0.1:13000/
     ;;
   status)
-    if check; then echo 'This shortcut owns a responding SSH control connection.'; probe
-    else echo 'This shortcut has no responding tunnel. Existing unrelated tunnels are not changed.'; exit 1; fi
+    ensure_listener
+    echo 'The singleton shared Hemma tunnel is running.'
+    probe
     ;;
   stop)
-    if check; then /usr/bin/ssh -S "$SOCKET" -O exit "$ALIAS"
-    else echo 'No responding tunnel owned by this shortcut.'; fi
+    echo 'This shortcut cannot stop the shared tunnel because other Hemma services use it.' >&2
+    exit 64
     ;;
   *) echo "Usage: $0 {start|status|stop}" >&2; exit 64 ;;
 esac
