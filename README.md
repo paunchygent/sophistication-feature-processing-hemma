@@ -52,13 +52,29 @@ Reserve host X display `:1` for this workstation. Snap Docker's daemon has a pri
 
 PUID/PGID must match the host owner. The candidate retains baseline values 1000/1000. See the integration note before using another account or rootless Docker.
 
-On the Mac, keep using:
+On the Mac, install the shared Hemma tunnel once:
+
+```bash
+./macos/Install-Hemma-Shared-Tunnel.command
+```
+
+This replaces the separate HuleEdu/offload, obsolete GPU, Sir Convert-a-Lot
+and workstation tunnel daemons with one launchd-supervised SSH connection. It
+owns the six non-conflicting loopback forwards and restarts automatically after
+sleep or network loss. Port 8082 remains with the local HuleEdu Docker service;
+the stale GPU forward cannot share that port. The retired LaunchAgent files
+remain recoverable under `~/Library/LaunchAgents.disabled`.
+
+Then open or check the workstation with:
 
 ```bash
 ./macos/Workshop-Tunnel.command
 ```
 
-The existing command filename and two forwards are unchanged. The separate Finder helper still opens the optional `Workshops` SMB share; it is not the general home-navigation contract.
+The workshop command never creates a second SSH connection; it starts the
+shared LaunchAgent when necessary, checks the forwarded HTTP route, and opens
+the browser. The separate Finder helper still opens the optional `Workshops`
+SMB share; it is not the general home-navigation contract.
 
 To reconnect the `Hemma` and `Workshops` Finder volumes automatically after a network drop, run once on the Mac:
 
