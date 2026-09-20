@@ -4,7 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 MACOS = ROOT / "macos"
-PORTS = (13000, 13001, 18085, 19000, 19100, 28085)
+PORTS = (13000, 13001, 15174, 18085, 19000, 19100, 28085)
 
 
 class SharedTunnelTests(unittest.TestCase):
