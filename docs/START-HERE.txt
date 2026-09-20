@@ -31,6 +31,7 @@ RESULTS
 DESKTOP
   LXQt supplies the panel, desktop and PCManFM-Qt. Openbox manages windows.
   Scott's portrait remains the desktop canary. No XFCE recovery loop is used.
-  The Mac tunnel and http://127.0.0.1:13000/ route are unchanged.
+  The Mac tunnel provides the workstation at http://127.0.0.1:13000/ and the
+  Human-CJ staging preview at http://127.0.0.1:15174/.
   Browser reconnect is different from restarting the container/X server:
   the latter can terminate GUI applications and lose unsaved changes.

@@ -1,6 +1,6 @@
 # Hemma Research Workstation
 
-General research work under `/home/paunchygent`, with TAALED, TAALES and JASP as peer tools. The Mac route remains the existing Tailscale/SSH tunnel to `http://127.0.0.1:13000/`. Neither published port is widened beyond host loopback.
+General research work under `/home/paunchygent`, with TAALED, TAALES and JASP as peer tools. The existing Tailscale/SSH tunnel provides the workstation at `http://127.0.0.1:13000/` and the Human-CJ staging preview at `http://127.0.0.1:15174/`. Neither published port is widened beyond host loopback.
 
 The streamed desktop is fixed at `1920x1080` with 125% UI scaling for a 14-inch MacBook display. Browser-driven resolution changes are disabled so reconnects cannot silently change the canvas. The pointer is rendered into the video stream; browser-side cursors left the mouse invisible over the canvas. The bottom panel uses the conventional application menu, running-applications taskbar, system tray, volume, clock, and show-desktop controls; the workspace switcher and empty quick-launch placeholder are removed.
 

@@ -41,7 +41,9 @@ chown abc:abc /config/Desktop
 install -o abc -g abc -m 0644 /defaults/hemma-home-link.desktop "/config/Desktop/Hemma Home.desktop"
 install -o abc -g abc -m 0644 /defaults/hemma-research-link.desktop "/config/Desktop/Hemma Research.desktop"
 cp /defaults/lxqt-session.conf /config/.config/lxqt/session.conf
-cp /defaults/lxqt-panel.conf /config/.config/lxqt/panel.conf
+if [[ ! -f /config/.config/lxqt/panel.conf ]]; then
+  cp /defaults/lxqt-panel.conf /config/.config/lxqt/panel.conf
+fi
 cp /defaults/pcmanfm-settings.conf /config/.config/pcmanfm-qt/lxqt/settings.conf
 cp /defaults/suite.desktop /config/.config/autostart/sophistication-feature-processing.desktop
 cp /defaults/Xresources /config/.Xresources

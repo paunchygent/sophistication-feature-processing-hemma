@@ -8,7 +8,7 @@ BIN="$HOME/.local/bin"
 AGENTS="$HOME/Library/LaunchAgents"
 DISABLED="$HOME/Library/LaunchAgents.disabled"
 PLIST="$AGENTS/$LABEL.plist"
-MANAGED_PORTS=(13000 13001 18085 19000 19100 28085)
+MANAGED_PORTS=(13000 13001 15174 18085 19000 19100 28085)
 LEGACY_LABELS=(com.hemma.huleedu-tunnel com.hemma.gpu-tunnel com.hemma.sir-convert-a-lot-tunnel)
 
 /usr/bin/install -d -m 0755 "$BIN" "$AGENTS" "$DISABLED" "$HOME/Library/Logs"
@@ -67,6 +67,6 @@ $listener_ready || {
   exit 1
 }
 
-echo 'One shared Hemma tunnel now owns ports 13000, 13001, 18085, 19000, 19100 and 28085.'
+echo 'One shared Hemma tunnel now owns ports 13000, 13001, 15174, 18085, 19000, 19100 and 28085.'
 echo 'The retired GPU forward on 8082 is excluded because local Docker owns that port.'
 echo 'launchd will restart it after sleep or network loss.'
