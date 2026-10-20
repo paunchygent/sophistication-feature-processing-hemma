@@ -9,3 +9,5 @@ materials/
 output/
 tools/taales_2.2/TAALES_2.2
 .codex/repomix_packages/
+
+.orchestration/
