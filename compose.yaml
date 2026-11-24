@@ -5,7 +5,7 @@ services:
       target: runtime
     image: sophistication-feature-processing-hemma:2026-09-15
     container_name: sophistication-feature-processing
-    restart: unless-stopped
+    restart: on-failure
     shm_size: 1gb
     environment:
       PUID: "1000"
